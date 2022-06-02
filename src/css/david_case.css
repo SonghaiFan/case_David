@@ -1,0 +1,16 @@
+.map_path {
+  fill: var(--bgr-transparent-low);
+  /* stroke: var(--font-color); */
+  stroke-width: 2px;
+  stroke-linejoin: round;
+}
+
+.station_rect {
+  fill: var(--primary);
+}
+
+.station_rect:hover {
+  stroke: var(--font-color);
+  stroke-width: 2px;
+  transition: ease, 1s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
