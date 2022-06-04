@@ -170,7 +170,7 @@ function init() {
 
   setStepNavigationBar();
 
-  4. render the first map
+  // 4. render the first map
   BubbleMap(sdata, fig_map);
 }
 
