@@ -39,10 +39,7 @@ const selected_dayOfYear = dayOfYear(new Date(selected_date));
 
 const tdataPOI = aq_tdata
   .filter(aq.escape((d) => d.type == selected_type))
-  .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-  .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7));
-
-console.log(sdata);
+  .filter((d) => d.year == 2021);
 
 const dataTable = d3
   .select("#tab1")
@@ -55,14 +52,20 @@ const dataTable = d3
 function stepTrigger(index) {
   switch (index) {
     case 0:
-      BubbleMap(sdata, fig_map);
       break;
     case 1:
-      LineChart(tdataPOI, fig1);
       break;
     case 2:
+      LineChart(tdataPOI, fig1);
+
       break;
     case 3:
+      LineChart(
+        tdataPOI
+          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
+        fig1
+      );
       break;
   }
 }
@@ -167,7 +170,7 @@ function init() {
 
   setStepNavigationBar();
 
-  // 4. render the first map
+  4. render the first map
   BubbleMap(sdata, fig_map);
 }
 

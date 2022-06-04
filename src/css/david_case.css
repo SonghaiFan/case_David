@@ -27,5 +27,13 @@
 }
 
 .temp_line {
+  stroke: var(--primary);
   stroke-linecap: round;
+  stroke-width: 0.2em;
+}
+
+.temp_line:hover {
+  stroke: var(--primary);
+  stroke-linecap: round;
+  stroke-width: 0.5em;
 }
