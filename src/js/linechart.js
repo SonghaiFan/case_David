@@ -5,9 +5,11 @@ async function LineChart(aqdata, container) {
     document.documentElement
   ).getPropertyValue("--primary");
 
-  console.log(d3.hsl(primary_color));
+  // const { h, s, l } = d3.hsl(primary_color).map((d) => Math.round(d));
 
-  const lumin85_interprator = (s) => `hsl(13, 96%, ${55 + 30 * s}%)`;
+  console.log(d3.color(primary_color));
+
+  const lumin_interprator = (i) => `hsl(13, 96%, ${55 + (95 - 55) * i}%)`;
 
   const margin = {
       top: 200,
@@ -40,7 +42,7 @@ async function LineChart(aqdata, container) {
     .derive({
       value_final_diff_rolsum: aq.rolling((d) => op.sum(d.value_final_diff)),
     })
-    .orderby("date")
+    .orderby(aq.desc("date"))
     .objects();
 
   console.log(data);
@@ -48,8 +50,10 @@ async function LineChart(aqdata, container) {
   const svg = container.select("svg");
   const tooltip = container.select("#tooltipContainer");
 
-  const t = svg.transition().duration(750);
-  const t2 = t.transition();
+  const smart_duration = data.length < 100 ? 1500 : 750;
+
+  const t = svg.transition().duration(smart_duration);
+  const t2 = t.transition().duration(smart_duration);
 
   const usedLayters = ["figureLayer", "xAxisLayer", "yAxisLayer"];
 
@@ -92,9 +96,9 @@ async function LineChart(aqdata, container) {
 
   const colorScale = d3
     .scaleSequentialPow()
-    .exponent(6.5)
+    .exponent(8)
     .domain([2022, 1910])
-    .interpolator(lumin85_interprator);
+    .interpolator(lumin_interprator);
 
   gx.transition(t)
     .attr("opacity", 1)
@@ -135,9 +139,8 @@ async function LineChart(aqdata, container) {
           .call((enter) =>
             enter
               .transition(t2)
-              .delay((d, i) => i)
               .duration((d) => d.value_final_diff)
-              .delay((d) => d.value_final_diff_rolsum)
+              .delay((d) => d.value_final_diff_rolsum + (d.year - 1910) * 10)
               .attr("opacity", 1)
               .attr("x2", (d) => xScale(x2Value(d)))
               .attr("y2", (d) => yScale(y2Value(d)))
