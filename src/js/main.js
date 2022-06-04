@@ -13,6 +13,10 @@ const chapters = d3.selectAll(".chapter");
 const navbar = d3.select("#navbar");
 const stationsIp = d3.select("#stationInput");
 
+const toggleSwitch = document.querySelector(
+  '.theme-switch input[type="checkbox"]'
+);
+
 // initialize the scrollama
 const scroller = scrollama();
 
@@ -32,14 +36,13 @@ const dayOfYear = (date) =>
     (date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)
   );
 
-const selected_date = "2022-05-19";
+const selected_date_string = "2021-7-21";
+const selected_date = new Date(selected_date_string);
 const selected_type = "tmax";
 
-const selected_dayOfYear = dayOfYear(new Date(selected_date));
+const selected_dayOfYear = dayOfYear(selected_date);
 
-const tdataPOI = aq_tdata
-  .filter(aq.escape((d) => d.type == selected_type))
-  .filter((d) => d.year == 2021);
+const tdataPOI = aq_tdata.filter(aq.escape((d) => d.type == selected_type));
 
 const dataTable = d3
   .select("#tab1")
@@ -56,10 +59,37 @@ function stepTrigger(index) {
     case 1:
       break;
     case 2:
-      LineChart(tdataPOI, fig1);
-
+      LineChart(
+        tdataPOI.filter(
+          aq.escape((d) => d.year == selected_date.getFullYear())
+        ),
+        fig1
+      );
       break;
     case 3:
+      LineChart(
+        tdataPOI.filter(
+          aq.escape(
+            (d) => (d.year == selected_date.getFullYear()) | (d.year == 1910)
+          )
+        ),
+        fig1
+      );
+      break;
+    case 4:
+      LineChart(
+        tdataPOI
+          .filter(
+            aq.escape(
+              (d) => (d.year == selected_date.getFullYear()) | (d.year == 1910)
+            )
+          )
+          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
+        fig1
+      );
+      break;
+    case 5:
       LineChart(
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
@@ -67,6 +97,30 @@ function stepTrigger(index) {
         fig1
       );
       break;
+    case 6:
+      break;
+    case 7:
+      break;
+    case 8:
+      break;
+    case 9:
+      break;
+    case 10:
+      break;
+    case 11:
+      break;
+    case 12:
+      break;
+    case 13:
+      break;
+  }
+}
+
+function switchTheme(e) {
+  if (e.target.checked) {
+    document.documentElement.setAttribute("data-theme", "dark");
+  } else {
+    document.documentElement.setAttribute("data-theme", "light");
   }
 }
 
@@ -148,10 +202,6 @@ function initialCanvas() {
     .style("opacity", 0);
 }
 
-const toggleSwitch = document.querySelector(
-  '.theme-switch input[type="checkbox"]'
-);
-
 function init() {
   // 1. force a resize on load to ensure proper dimensions are sent to scrollama
   handleResize();
@@ -177,13 +227,5 @@ function init() {
 // kick things off
 window.onload = init();
 window.addEventListener("resize", handleResize);
-
-function switchTheme(e) {
-  if (e.target.checked) {
-    document.documentElement.setAttribute("data-theme", "dark");
-  } else {
-    document.documentElement.setAttribute("data-theme", "light");
-  }
-}
 
 toggleSwitch.addEventListener("change", switchTheme, false);

@@ -1,6 +1,14 @@
 async function LineChart(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
+  const primary_color = getComputedStyle(
+    document.documentElement
+  ).getPropertyValue("--primary");
+
+  console.log(d3.hsl(primary_color));
+
+  const lumin85_interprator = (s) => `hsl(13, 96%, ${55 + 30 * s}%)`;
+
   const margin = {
       top: 200,
       right: 30,
@@ -32,6 +40,7 @@ async function LineChart(aqdata, container) {
     .derive({
       value_final_diff_rolsum: aq.rolling((d) => op.sum(d.value_final_diff)),
     })
+    .orderby("date")
     .objects();
 
   console.log(data);
@@ -83,8 +92,9 @@ async function LineChart(aqdata, container) {
 
   const colorScale = d3
     .scaleSequentialPow()
-    .domain(d3.extent(data, colorValue));
-  // .interpolator(d3.interpolateReds);
+    .exponent(6.5)
+    .domain([2022, 1910])
+    .interpolator(lumin85_interprator);
 
   gx.transition(t)
     .attr("opacity", 1)
@@ -109,42 +119,44 @@ async function LineChart(aqdata, container) {
     .selectAll("line")
     .data(data, (d) => `${d.year}_${d.day_of_year}`);
 
-  const line_length = (d) =>
-    Math.sqrt((x1Value(d) - x2Value(d)) ** 2 + (y1Value(d) - y2Value(d)) ** 2);
-
-  temp_lines.join(
-    (enter) =>
-      enter
-        .append("line")
-        .attr("class", "temp_line")
-        .attr("id", (d) => `temp_line'_${d.year}_${d.day_of_year}`)
-        .attr("opacity", 0)
-        .attr("x1", (d) => xScale(x1Value(d)))
-        .attr("y1", (d) => yScale(y1Value(d)))
-        .attr("x2", (d) => xScale(x1Value(d)))
-        .attr("y2", (d) => yScale(y1Value(d)))
-        .call((enter) =>
-          enter
-            .transition(t2)
-            .duration((d) => d.value_final_diff)
-            .delay((d) => d.value_final_diff_rolsum)
-            .attr("opacity", 1)
+  temp_lines
+    .join(
+      (enter) =>
+        enter
+          .append("line")
+          .attr("class", "temp_line")
+          .attr("id", (d) => `temp_line'_${d.year}_${d.day_of_year}`)
+          .attr("opacity", 0)
+          .attr("stroke", (d) => colorScale(colorValue(d)))
+          .attr("x1", (d) => xScale(x1Value(d)))
+          .attr("y1", (d) => yScale(y1Value(d)))
+          .attr("x2", (d) => xScale(x1Value(d)))
+          .attr("y2", (d) => yScale(y1Value(d)))
+          .call((enter) =>
+            enter
+              .transition(t2)
+              .delay((d, i) => i)
+              .duration((d) => d.value_final_diff)
+              .delay((d) => d.value_final_diff_rolsum)
+              .attr("opacity", 1)
+              .attr("x2", (d) => xScale(x2Value(d)))
+              .attr("y2", (d) => yScale(y2Value(d)))
+          ),
+      (update) =>
+        update.call((update) =>
+          update
+            .transition(t)
+            .style("opacity", 1)
+            .attr("stroke", (d) => colorScale(colorValue(d)))
+            .attr("x1", (d) => xScale(x1Value(d)))
+            .attr("y1", (d) => yScale(y1Value(d)))
             .attr("x2", (d) => xScale(x2Value(d)))
             .attr("y2", (d) => yScale(y2Value(d)))
         ),
-    (update) =>
-      update.call((update) =>
-        update
-          .transition(t)
-          .style("opacity", 1)
-          .attr("x1", (d) => xScale(x1Value(d)))
-          .attr("y1", (d) => yScale(y1Value(d)))
-          .attr("x2", (d) => xScale(x2Value(d)))
-          .attr("y2", (d) => yScale(y2Value(d)))
-      ),
-    (exit) =>
-      exit.call((exit) => exit.transition(t).attr("opacity", 0).remove())
-  );
+      (exit) =>
+        exit.call((exit) => exit.transition(t).attr("opacity", 0).remove())
+    )
+    .lower();
 }
 
 export { LineChart };
