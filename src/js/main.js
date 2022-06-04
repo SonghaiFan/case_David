@@ -1,5 +1,6 @@
 import UnitChart from "./UnitChart.js";
 import { BubbleMap } from "./map.js";
+import { LineChart } from "./linechart.js";
 
 const figures = d3.selectAll(".figure");
 const article = d3.selectAll(".article");
@@ -10,24 +11,42 @@ const fig3 = d3.select("#fig3");
 const steps = d3.selectAll(".step");
 const chapters = d3.selectAll(".chapter");
 const navbar = d3.select("#navbar");
+const stationsIp = d3.select("#stationInput");
 
 // initialize the scrollama
 const scroller = scrollama();
 
 // load the data
 
-const dataPath = "src/data/stations.csv";
+const sdataPath = "src/data/stations.csv";
+const tdataPath = "src/data/rich_mel_data.csv";
 
-const aqData = await aq.loadCSV(dataPath);
+const aq_sdata = await aq.loadCSV(sdataPath);
+const aq_tdata = await aq.loadCSV(tdataPath);
 
-// const data = await d3.csv(dataPath);
-const data = aqData.objects();
+const sdata = aq_sdata.objects();
+const tdata = aq_tdata.objects();
 
-console.log(data);
+const dayOfYear = (date) =>
+  Math.floor(
+    (date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)
+  );
+
+const selected_date = "2022-05-19";
+const selected_type = "tmax";
+
+const selected_dayOfYear = dayOfYear(new Date(selected_date));
+
+const tdataPOI = aq_tdata
+  .filter(aq.escape((d) => d.type == selected_type))
+  .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+  .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7));
+
+console.log(sdata);
 
 const dataTable = d3
   .select("#tab1")
-  .html(aqData.slice(1, 10).toHTML())
+  .html(aq_sdata.slice(1, 10).toHTML())
   .select("table")
   .attr("class", "u-full-width");
 
@@ -36,8 +55,10 @@ const dataTable = d3
 function stepTrigger(index) {
   switch (index) {
     case 0:
+      BubbleMap(sdata, fig_map);
       break;
     case 1:
+      LineChart(tdataPOI, fig1);
       break;
     case 2:
       break;
@@ -147,7 +168,7 @@ function init() {
   setStepNavigationBar();
 
   // 4. render the first map
-  BubbleMap(data, fig_map);
+  BubbleMap(sdata, fig_map);
 }
 
 // kick things off
