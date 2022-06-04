@@ -1,20 +1,20 @@
-function BubbleMap(data, canvas, article) {
+function BubbleMap(data, svg, article) {
   const margin = {
       top: 30,
       right: 30,
       bottom: 30,
       left: 30,
     },
-    width = canvas.attr("width") - margin.left - margin.right,
-    height = canvas.attr("height") - margin.top - margin.bottom;
+    width = svg.attr("width") - margin.left - margin.right,
+    height = svg.attr("height") - margin.top - margin.bottom;
 
   const world_url = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 
-  const t = canvas.transition().duration(750);
+  const t = svg.transition().duration(750);
 
-  const g = canvas.select("#figureGroup"),
-    gx = canvas.select("#xAxisGroup"),
-    gy = canvas.select("#yAxisGroup");
+  const g = svg.select("#figureGroup"),
+    gx = svg.select("#xAxisGroup"),
+    gy = svg.select("#yAxisGroup");
 
   g.selectAll("path").transition(t).attr("opacity", 1);
 

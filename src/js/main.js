@@ -16,7 +16,7 @@ const scroller = scrollama();
 
 // load the data
 
-const dataPath = "src/data/demo.csv";
+const dataPath = "src/data/stations.csv";
 
 const aqData = await aq.loadCSV(dataPath);
 
@@ -36,7 +36,6 @@ const dataTable = d3
 function stepTrigger(index) {
   switch (index) {
     case 0:
-      BubbleMap(data, fig_map);
       break;
     case 1:
       break;
@@ -146,6 +145,9 @@ function init() {
   scroller.onStepEnter(handleStepEnter);
 
   setStepNavigationBar();
+
+  // 4. render the first map
+  BubbleMap(data, fig_map);
 }
 
 // kick things off

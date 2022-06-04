@@ -83,7 +83,12 @@
         ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa
         quis enim.
       </p>
+      <div id="station-input-wrapper">
+        <label for="stationinput">Selected station:</label>
+        <select id="stationInput"></select>
+      </div>
       <div class="figure" id="fig_map">
+        <div id="tooltipContainer"></div>
         <p>0</p>
       </div>
     </div>
@@ -398,6 +403,7 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
     <!-- JS library
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/topojson@3"></script>
@@ -406,7 +412,6 @@
     <script src="https://unpkg.com/intersection-observer"></script>
     <script src="https://unpkg.com/scrollama"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/apache-arrow@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/arquero@latest"></script>
 
     <script type="module" src="src/js/main.js"></script>

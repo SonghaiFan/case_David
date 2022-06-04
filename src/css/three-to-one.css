@@ -57,6 +57,11 @@ svg {
 /* Buttons
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 
+select:focus {
+  border: 1px solid var(--primary);
+  outline: 0;
+}
+
 .button.button-primary,
 button.button-primary,
 input[type="submit"].button-primary,
@@ -333,7 +338,7 @@ input[type="button"].button-primary:focus {
   height: var(--head-height);
   position: relative;
   width: calc(var(--head-height) * 2);
-  right: 10px;
+  right: 20px;
 }
 
 .theme-switch input {
@@ -384,8 +389,11 @@ input:checked + .slider:before {
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 #tooltipContainer {
   z-index: 100;
+  border-radius: 4px;
   display: none;
   position: absolute;
-  background-color: var(--bg-transparent-low);
+  background-color: var(--bg-transparent-hig);
   padding: 5px;
+  backdrop-filter: blur(2px);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
