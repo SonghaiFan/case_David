@@ -23,9 +23,11 @@ async function BubbleMap(data, container) {
   const layers = svg
     .selectAll("g")
     .data(usedLayters, (d) => d)
-    .classed("is-active", true);
-
-  layers.attr("transform", `translate(${margin.left},${margin.top})`);
+    .join(
+      (enter) => enter,
+      (update) => update.classed("is-active", true),
+      (exit) => exit.classed("is-active", false)
+    );
 
   const stationsIp = d3.select("#stationInput");
 
@@ -51,6 +53,9 @@ async function BubbleMap(data, container) {
 
   const g = svg.select(".figureLayer"),
     g1 = svg.select(".figureLayer1");
+
+  g.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
+  g1.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
 
   const gdata = await d3.json(world_url);
 

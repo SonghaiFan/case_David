@@ -1,4 +1,4 @@
-async function ScatterPlot(aqdata, container) {
+async function DotPlot(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const primary_color = getComputedStyle(
@@ -9,9 +9,6 @@ async function ScatterPlot(aqdata, container) {
   Math.round(h);
 
   console.log(d3.hsl(primary_color));
-
-  const lumin_interprator = (i) =>
-    `hsl(${h}nn   , ${s * 100}%, ${(1 - i) * l * 100 + 95 * i}%)`;
 
   const margin = {
       top: 200,
@@ -38,21 +35,22 @@ async function ScatterPlot(aqdata, container) {
   const t = svg.transition().duration(smart_duration);
   const t2 = t.transition().duration(smart_duration);
 
-  const usedLayters = ["figureLayer", "xAxisLayer", "yAxisLayer"];
+  const usedLayters = ["figureLayer1", "xAxisLayer", "yAxisLayer"];
 
-  const layers = svg.selectAll("g").data(usedLayters, (d) => d);
+  const layers = svg
+    .selectAll("g")
+    .data(usedLayters, (d) => d)
+    .join(
+      (enter) => enter,
+      (update) => update.classed("is-active", true),
+      (exit) => exit.classed("is-active", false)
+    );
 
-  layers
-    .transition(t)
-    .attr("transform", `translate(${margin.left},${margin.top})`)
-    .transition(t2)
-    .style("opacity", 1);
-
-  const g = svg.select(".figureLayer"),
+  const g1 = svg.select(".figureLayer1"),
     gx = svg.select(".xAxisLayer"),
     gy = svg.select(".yAxisLayer");
 
-  g.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
+  g1.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
   gx.transition(t).attr(
     "transform",
     `translate(${margin.left},${innerHeight + margin.top})`
@@ -61,20 +59,18 @@ async function ScatterPlot(aqdata, container) {
 
   // data.sort((a, b) => a.date - b.date);
 
-  const x1Value = (d) => d.day_of_year;
-  const y1Value = (d) => d.value_final;
-  const x2Value = (d) => d.day_of_year_lead;
-  const y2Value = (d) => d.value_final_lead;
+  const xValue = (d) => d.day_of_year;
+  const yValue = (d) => d.value_final;
   const colorValue = (d) => d.year;
 
   const yScale = d3
     .scaleLinear()
-    .domain([0, d3.max(data, y1Value)])
+    .domain([0, d3.max(data, yValue)])
     .range([innerHeight, 0]);
 
   const xScale = d3
     .scaleLinear()
-    .domain(d3.extent(data, x1Value))
+    .domain(d3.extent(data, xValue))
     .range([0, innerWidth]);
 
   // const colorScale = d3
@@ -88,66 +84,59 @@ async function ScatterPlot(aqdata, container) {
     .domain([1900, 2050])
     .interpolator(d3.interpolateReds);
 
-  gx.transition(t)
-    .attr("opacity", 1)
-    .call(d3.axisBottom(xScale))
-    .call((g) =>
-      g
-        .selectAll("text")
-        .attr("transform", "rotate(15)")
-        .style("text-anchor", "start")
-    );
+  gx.transition(t).call(d3.axisBottom(xScale));
 
-  gy.transition(t)
-    .attr("opacity", 1)
-    .call(
-      d3
-        .axisLeft(yScale)
-        .tickFormat(d3.format("~s"))
-        .ticks(Math.round(width / 100))
-    );
+  gy.transition(t).call(
+    d3
+      .axisLeft(yScale)
+      .tickFormat(d3.format("~s"))
+      .ticks(Math.round(width / 100))
+  );
 
-  const temp_lines = g
-    .selectAll("line")
+  const mark_size = 15;
+
+  const temp_rect = g1
+    .selectAll("rect")
     .data(data, (d) => `${d.year}_${d.day_of_year}`);
 
-  temp_lines
-    .join(
-      (enter) =>
-        enter
-          .append("line")
-          .attr("class", "temp_line")
-          .attr("id", (d) => `temp_line'_${d.year}_${d.day_of_year}`)
-          .style("opacity", 0)
-          .style("stroke", (d) => colorScale(colorValue(d)))
-          .attr("x1", (d) => xScale(x1Value(d)))
-          .attr("y1", (d) => yScale(y1Value(d)))
-          .attr("x2", (d) => xScale(x1Value(d)))
-          .attr("y2", (d) => yScale(y1Value(d)))
-          .call((enter) =>
-            enter
-              .transition(t2)
-              .duration((d) => d.value_final_diff)
-              .delay((d) => d.value_final_diff_rolsum + (d.year - 1910) * 10)
-              .style("opacity", 1)
-              .attr("x2", (d) => xScale(x2Value(d)))
-              .attr("y2", (d) => yScale(y2Value(d)))
-          ),
-      (update) =>
-        update.call((update) =>
-          update
+  temp_rect.join(
+    (enter) =>
+      enter
+        .append("rect")
+        .attr("class", "temp_rect")
+        .style("fill", (d) => colorScale(colorValue(d)))
+        .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
+        .attr("rx", (d) => mark_size)
+        .attr("ry", (d) => mark_size)
+        .attr("width", (d) => mark_size)
+        .attr("height", (d) => mark_size)
+        .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
+        .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
+        .call((enter) =>
+          enter
             .transition(t)
-            .style("opacity", 1)
-            .style("stroke", (d) => colorScale(colorValue(d)))
-            .attr("x1", (d) => xScale(x1Value(d)))
-            .attr("y1", (d) => yScale(y1Value(d)))
-            .attr("x2", (d) => xScale(x2Value(d)))
-            .attr("y2", (d) => yScale(y2Value(d)))
+            .attr("rx", (d) => mark_size)
+            .attr("ry", (d) => mark_size)
+            .attr("width", (d) => mark_size)
+            .attr("height", (d) => mark_size)
+            .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
+            .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
         ),
-      (exit) =>
-        exit.call((exit) => exit.transition(t).style("opacity", 0).remove())
-    )
-    .lower();
+    (update) =>
+      update.call((update) =>
+        update
+          .transition(t)
+          .style("fill", (d) => colorScale(colorValue(d)))
+          .attr("width", (d) => mark_size)
+          .attr("height", (d) => mark_size)
+          .attr("rx", (d) => mark_size)
+          .attr("ry", (d) => mark_size)
+          .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
+          .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
+      ),
+    (exit) =>
+      exit.call((exit) => exit.transition(t).attr("width", 0).attr("height", 0))
+  );
 }
 
-export { ScatterPlot };
+export { DotPlot as ScatterPlot };

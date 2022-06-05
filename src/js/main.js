@@ -1,6 +1,7 @@
 import UnitChart from "./UnitChart.js";
 import { BubbleMap } from "./renderMap.js";
 import { LineChart, LineChart_Dot } from "./renderLine.js";
+import { ScatterPlot } from "./renderDot.js";
 
 const figures = d3.selectAll(".figure");
 const article = d3.selectAll(".article");
@@ -134,6 +135,13 @@ function stepTrigger(index) {
       );
       break;
     case 8:
+      ScatterPlot(
+        tdataPOI
+          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
+          .filter(aq.escape((d) => d.occasional_frequency != "Frequent")),
+        fig1
+      );
       break;
     case 9:
       break;

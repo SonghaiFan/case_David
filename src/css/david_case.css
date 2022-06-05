@@ -28,6 +28,7 @@
 
 .temp_line {
   stroke: var(--primary);
+  stroke-width: 2px;
   stroke-linecap: round;
 }
 

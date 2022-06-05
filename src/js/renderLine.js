@@ -3,15 +3,15 @@ const primary_color = getComputedStyle(
 ).getPropertyValue("--primary");
 
 const { h, s, l } = d3.hsl(primary_color);
-Math.round(h);
 
-console.log(d3.hsl(primary_color));
+const custom_interprator = (i) =>
+  `hsla(${h},
+    ${s * 100 * i}%, 
+    ${l * 100 + (50 - l * 100) * i}%,
+    ${0.2 + (1 - 0.2) * i})`;
 
 async function LineChart(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
-
-  const lumin_interprator = (i) =>
-    `hsl(${h}nn   , ${s * 100}%, ${(1 - i) * l * 100 + 95 * i}%)`;
 
   const margin = {
       top: 200,
@@ -59,13 +59,14 @@ async function LineChart(aqdata, container) {
 
   const usedLayters = ["figureLayer", "xAxisLayer", "yAxisLayer"];
 
-  const layers = svg.selectAll("g").data(usedLayters, (d) => d);
-
-  layers
-    .transition(t)
-    .attr("transform", `translate(${margin.left},${margin.top})`)
-    .transition(t2)
-    .style("opacity", 1);
+  const layers = svg
+    .selectAll("g")
+    .data(usedLayters, (d) => d)
+    .join(
+      (enter) => enter,
+      (update) => update.classed("is-active", true),
+      (exit) => exit.classed("is-active", false)
+    );
 
   const g = svg.select(".figureLayer"),
     gx = svg.select(".xAxisLayer"),
@@ -104,8 +105,8 @@ async function LineChart(aqdata, container) {
 
   const colorScale = d3
     .scaleSequential()
-    .domain([1900, 2050])
-    .interpolator(d3.interpolateReds);
+    .domain([1910, 2022])
+    .interpolator(custom_interprator);
 
   gx.transition(t)
     .call(d3.axisBottom(xScale))
@@ -179,9 +180,6 @@ async function LineChart_Dot(aqdata, container) {
   Math.round(h);
 
   console.log(d3.hsl(primary_color));
-
-  const lumin_interprator = (i) =>
-    `hsl(${h}nn   , ${s * 100}%, ${(1 - i) * l * 100 + 95 * i}%)`;
 
   const margin = {
       top: 200,
@@ -272,7 +270,7 @@ async function LineChart_Dot(aqdata, container) {
   const colorScale = d3
     .scaleSequential()
     .domain([1900, 2050])
-    .interpolator(d3.interpolateReds);
+    .interpolator(custom_interprator);
 
   gx.transition(t)
     .call(d3.axisBottom(xScale))
