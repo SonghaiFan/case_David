@@ -54,6 +54,16 @@ svg {
   fill: var(--font-color);
 }
 
+svg > .layer {
+  opacity: 0;
+  transition: ease-in-out 750ms;
+  transition-property: opacity;
+}
+
+svg > .layer.is-active {
+  opacity: 1;
+}
+
 /* Buttons
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 

@@ -20,13 +20,12 @@ async function BubbleMap(data, container) {
 
   const usedLayters = ["figureLayer", "figureLayer1"];
 
-  const layers = svg.selectAll("g").data(usedLayters, (d) => d);
+  const layers = svg
+    .selectAll("g")
+    .data(usedLayters, (d) => d)
+    .classed("is-active", true);
 
-  layers
-    .transition(t)
-    .attr("transform", `translate(${margin.left},${margin.top})`)
-    .transition(t2)
-    .style("opacity", 1);
+  layers.attr("transform", `translate(${margin.left},${margin.top})`);
 
   const stationsIp = d3.select("#stationInput");
 
@@ -88,18 +87,22 @@ async function BubbleMap(data, container) {
           .append("rect")
           .attr("class", "station_rect")
           .attr("id", (d) => `station_rect_${d.station_name.replace(" ", "_")}`)
-          .attr("width", 0)
-          .attr("height", 0)
-          .call((enter) =>
-            enter
-              .transition(t)
-              .attr("rx", (d) => mark_size)
-              .attr("ry", (d) => mark_size)
-              .attr("width", (d) => mark_size)
-              .attr("height", (d) => mark_size)
-              .attr("x", (d) => projection([d.lon, d.lat])[0] - mark_size / 2)
-              .attr("y", (d) => projection([d.lon, d.lat])[1] - mark_size / 2)
-          ),
+          .attr("rx", (d) => mark_size)
+          .attr("ry", (d) => mark_size)
+          .attr("width", (d) => mark_size)
+          .attr("height", (d) => mark_size)
+          .attr("x", (d) => projection([d.lon, d.lat])[0] - mark_size / 2)
+          .attr("y", (d) => projection([d.lon, d.lat])[1] - mark_size / 2),
+      // .call((enter) =>
+      //   enter
+      //     .transition(t)
+      //     .attr("rx", (d) => mark_size)
+      //     .attr("ry", (d) => mark_size)
+      //     .attr("width", (d) => mark_size)
+      //     .attr("height", (d) => mark_size)
+      //     .attr("x", (d) => projection([d.lon, d.lat])[0] - mark_size / 2)
+      //     .attr("y", (d) => projection([d.lon, d.lat])[1] - mark_size / 2)
+      // )
       (update) =>
         update.call((update) =>
           update

@@ -1,6 +1,6 @@
 import UnitChart from "./UnitChart.js";
-import { BubbleMap } from "./map.js";
-import { LineChart } from "./linechart.js";
+import { BubbleMap } from "./renderMap.js";
+import { LineChart, LineChart_Dot } from "./renderLine.js";
 
 const figures = d3.selectAll(".figure");
 const article = d3.selectAll(".article");
@@ -16,7 +16,26 @@ const stationsIp = d3.select("#stationInput");
 const toggleSwitch = document.querySelector(
   '.theme-switch input[type="checkbox"]'
 );
+const currentTheme = localStorage.getItem("theme")
+  ? localStorage.getItem("theme")
+  : null;
+if (currentTheme) {
+  document.documentElement.setAttribute("data-theme", currentTheme);
 
+  if (currentTheme === "dark") {
+    toggleSwitch.checked = true;
+  }
+}
+
+function switchTheme(e) {
+  if (e.target.checked) {
+    document.documentElement.setAttribute("data-theme", "dark");
+    localStorage.setItem("theme", "dark"); //add this
+  } else {
+    document.documentElement.setAttribute("data-theme", "light");
+    localStorage.setItem("theme", "light"); //add this
+  }
+}
 // initialize the scrollama
 const scroller = scrollama();
 
@@ -98,8 +117,21 @@ function stepTrigger(index) {
       );
       break;
     case 6:
+      LineChart_Dot(
+        tdataPOI
+          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
+        fig1
+      );
       break;
     case 7:
+      LineChart_Dot(
+        tdataPOI
+          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
+          .filter(aq.escape((d) => d.occasional_frequency != "Frequent")),
+        fig1
+      );
       break;
     case 8:
       break;
@@ -113,14 +145,6 @@ function stepTrigger(index) {
       break;
     case 13:
       break;
-  }
-}
-
-function switchTheme(e) {
-  if (e.target.checked) {
-    document.documentElement.setAttribute("data-theme", "dark");
-  } else {
-    document.documentElement.setAttribute("data-theme", "light");
   }
 }
 
@@ -198,8 +222,7 @@ function initialCanvas() {
     .data(defaultLayters)
     .enter()
     .append("g")
-    .attr("class", (d) => d)
-    .style("opacity", 0);
+    .attr("class", (d) => `layer ${d}`);
 }
 
 function init() {
@@ -227,5 +250,4 @@ function init() {
 // kick things off
 window.onload = init();
 window.addEventListener("resize", handleResize);
-
 toggleSwitch.addEventListener("change", switchTheme, false);

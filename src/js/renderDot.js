@@ -1,15 +1,17 @@
-async function LineChart(aqdata, container) {
+async function ScatterPlot(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const primary_color = getComputedStyle(
     document.documentElement
   ).getPropertyValue("--primary");
 
-  // const { h, s, l } = d3.hsl(primary_color).map((d) => Math.round(d));
+  const { h, s, l } = d3.hsl(primary_color);
+  Math.round(h);
 
-  console.log(d3.color(primary_color));
+  console.log(d3.hsl(primary_color));
 
-  const lumin_interprator = (i) => `hsl(13, 96%, ${55 + (95 - 55) * i}%)`;
+  const lumin_interprator = (i) =>
+    `hsl(${h}nn   , ${s * 100}%, ${(1 - i) * l * 100 + 95 * i}%)`;
 
   const margin = {
       top: 200,
@@ -23,25 +25,6 @@ async function LineChart(aqdata, container) {
   const data = aqdata
     .select("date", "year", "day_of_year", "value_final")
     .groupby("year")
-    .orderby("day_of_year")
-    .derive({
-      value_final_lead: (d) =>
-        op.is_nan(+op.lead(d.value_final))
-          ? d.value_final
-          : op.lead(d.value_final),
-    })
-    .derive({
-      day_of_year_lead: (d) =>
-        op.is_nan(+op.lead(d.day_of_year))
-          ? d.day_of_year
-          : op.lead(d.day_of_year),
-    })
-    .derive({
-      value_final_diff: (d) => op.abs(d.value_final_lead - d.value_final),
-    })
-    .derive({
-      value_final_diff_rolsum: aq.rolling((d) => op.sum(d.value_final_diff)),
-    })
     .orderby(aq.desc("date"))
     .objects();
 
@@ -94,11 +77,16 @@ async function LineChart(aqdata, container) {
     .domain(d3.extent(data, x1Value))
     .range([0, innerWidth]);
 
+  // const colorScale = d3
+  //   .scaleSequentialPow()
+  //   .exponent(8)
+  //   .domain([1910, 2022])
+  //   .interpolator(d3.interpolateReds);
+
   const colorScale = d3
-    .scaleSequentialPow()
-    .exponent(8)
-    .domain([2022, 1910])
-    .interpolator(lumin_interprator);
+    .scaleSequential()
+    .domain([1900, 2050])
+    .interpolator(d3.interpolateReds);
 
   gx.transition(t)
     .attr("opacity", 1)
@@ -130,8 +118,8 @@ async function LineChart(aqdata, container) {
           .append("line")
           .attr("class", "temp_line")
           .attr("id", (d) => `temp_line'_${d.year}_${d.day_of_year}`)
-          .attr("opacity", 0)
-          .attr("stroke", (d) => colorScale(colorValue(d)))
+          .style("opacity", 0)
+          .style("stroke", (d) => colorScale(colorValue(d)))
           .attr("x1", (d) => xScale(x1Value(d)))
           .attr("y1", (d) => yScale(y1Value(d)))
           .attr("x2", (d) => xScale(x1Value(d)))
@@ -141,7 +129,7 @@ async function LineChart(aqdata, container) {
               .transition(t2)
               .duration((d) => d.value_final_diff)
               .delay((d) => d.value_final_diff_rolsum + (d.year - 1910) * 10)
-              .attr("opacity", 1)
+              .style("opacity", 1)
               .attr("x2", (d) => xScale(x2Value(d)))
               .attr("y2", (d) => yScale(y2Value(d)))
           ),
@@ -150,16 +138,16 @@ async function LineChart(aqdata, container) {
           update
             .transition(t)
             .style("opacity", 1)
-            .attr("stroke", (d) => colorScale(colorValue(d)))
+            .style("stroke", (d) => colorScale(colorValue(d)))
             .attr("x1", (d) => xScale(x1Value(d)))
             .attr("y1", (d) => yScale(y1Value(d)))
             .attr("x2", (d) => xScale(x2Value(d)))
             .attr("y2", (d) => yScale(y2Value(d)))
         ),
       (exit) =>
-        exit.call((exit) => exit.transition(t).attr("opacity", 0).remove())
+        exit.call((exit) => exit.transition(t).style("opacity", 0).remove())
     )
     .lower();
 }
 
-export { LineChart };
+export { ScatterPlot };
