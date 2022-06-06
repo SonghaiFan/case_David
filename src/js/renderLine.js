@@ -243,7 +243,11 @@ async function LineChart_Dot(aqdata, container) {
   const layers = svg
     .selectAll("g")
     .data(usedLayters, (d) => d)
-    .classed("is-active", true);
+    .join(
+      (enter) => enter,
+      (update) => update.classed("is-active", true),
+      (exit) => exit.classed("is-active", false)
+    );
 
   const g = svg.select(".figureLayer"),
     gx = svg.select(".xAxisLayer"),

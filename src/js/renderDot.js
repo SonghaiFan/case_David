@@ -85,7 +85,6 @@ async function DotPlot(aqdata, container) {
 
   const data = aqdata
     .select("date", "year", "decade", "day_of_year", "value_final")
-    .groupby("year")
     .orderby(aq.desc("date"))
     .objects();
 
@@ -186,7 +185,7 @@ async function DotPlot(aqdata, container) {
   );
 }
 
-async function DotPlot_stack(aqdata, container) {
+async function DotPlot_dodge(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const margin = {
@@ -200,8 +199,8 @@ async function DotPlot_stack(aqdata, container) {
 
   const data = aqdata
     .select("date", "year", "decade", "day_of_year", "value_final")
-    .groupby("year")
     .orderby(aq.desc("date"))
+    .derive({ index: (d) => op.row_number() - 1 })
     .objects();
 
   const svg = container.select("svg");
@@ -229,24 +228,27 @@ async function DotPlot_stack(aqdata, container) {
   g1.attr("transform", `translate(${margin.left},${margin.top})`);
   gx.attr("transform", `translate(${margin.left},${innerHeight + margin.top})`);
 
-  // data.sort((a, b) => a.date - b.date);
+  const mark_size = 15;
+  const padding = 0;
 
   const xValue = (d) => d.year;
   const yValue = (d) => d.value_final;
-
-  const yScale = d3
-    .scaleLinear()
-    .domain([0, d3.max(data, yValue)])
-    .range([innerHeight, 0]);
+  const iValue = (d) => d.index;
 
   const xScale = d3
     .scaleLinear()
     .domain(d3.extent(data, xValue))
     .range([0, innerWidth]);
 
-  gx.transition(t).call(d3.axisBottom(xScale));
+  const X = d3.map(data, xValue).map((x) => (x == null ? NaN : +x));
+  // Compute which data points are considered defined.
+  const I = d3.range(X.length).filter((i) => !isNaN(X[i]));
+  const Y = dodge(
+    I.map((i) => xScale(X[i])),
+    mark_size * 2 + padding
+  );
 
-  const mark_size = 15;
+  gx.transition(t).call(d3.axisBottom(xScale));
 
   const temp_rect = g1
     .selectAll("rect")
@@ -263,8 +265,11 @@ async function DotPlot_stack(aqdata, container) {
         .attr("ry", (d) => mark_size)
         .attr("width", (d) => mark_size)
         .attr("height", (d) => mark_size)
-        .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
-        .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
+        .attr("x", (d) => xScale(X[d.index]) - mark_size / 2)
+        .attr(
+          "y",
+          (d) => innerHeight - mark_size - padding - Y[d.index] - mark_size / 2
+        )
         .call((enter) =>
           enter
             .transition(t)
@@ -272,8 +277,12 @@ async function DotPlot_stack(aqdata, container) {
             .attr("ry", (d) => mark_size)
             .attr("width", (d) => mark_size)
             .attr("height", (d) => mark_size)
-            .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
-            .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
+            .attr("x", (d) => xScale(X[d.index]) - mark_size / 2)
+            .attr(
+              "y",
+              (d) =>
+                innerHeight - mark_size - padding - Y[d.index] - mark_size / 2
+            )
         ),
     (update) =>
       update.call((update) =>
@@ -284,12 +293,16 @@ async function DotPlot_stack(aqdata, container) {
           .attr("height", (d) => mark_size)
           .attr("rx", (d) => mark_size)
           .attr("ry", (d) => mark_size)
-          .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
-          .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
+          .attr("x", (d) => xScale(X[d.index]) - mark_size / 2)
+          .attr(
+            "y",
+            (d) =>
+              innerHeight - mark_size - padding - Y[d.index] - mark_size / 2
+          )
       ),
     (exit) =>
       exit.call((exit) => exit.transition(t).attr("width", 0).attr("height", 0))
   );
 }
 
-export { DotPlot, DotPlot_stack };
+export { DotPlot, DotPlot_dodge };

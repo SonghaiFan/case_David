@@ -1,7 +1,7 @@
 import UnitChart from "./UnitChart.js";
 import { BubbleMap } from "./renderMap.js";
 import { LineChart, LineChart_Dot } from "./renderLine.js";
-import { DotPlot, DotPlot_stack } from "./renderDot.js";
+import { DotPlot, DotPlot_dodge } from "./renderDot.js";
 
 const figures = d3.selectAll(".figure");
 const article = d3.selectAll(".article");
@@ -146,7 +146,7 @@ function stepTrigger(index) {
       );
       break;
     case 9:
-      DotPlot_stack(
+      DotPlot_dodge(
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
