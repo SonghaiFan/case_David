@@ -11,7 +11,7 @@ const colorScale = d3
   );
 
 const colorValue = (d) => d.year;
-
+const dateFormat = d3.timeFormat("%e %B %Y");
 const selected_date_string = localStorage.getItem("selected_date_string");
 const selected_date = new Date(selected_date_string);
 const selected_year = selected_date.getFullYear();
@@ -110,42 +110,59 @@ async function Histgram(aqdata, container) {
     .selectAll("rect")
     .data(data, (d) => `${d.year}_${d.day_of_year}`);
 
-  temp_rect.join(
-    (enter) =>
-      enter
-        .append("rect")
-        .attr("class", "temp_rect")
-        .style("fill", (d) => custom_colorScale(d))
-        .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
-        .attr("width", xScale.bandwidth())
-        .attr("height", 0)
-        .attr("x", (d) => xScale(xValue(d)))
-        .attr("y", innerHeight)
-        .call((enter) =>
-          enter
-            .transition(t3)
+  temp_rect
+    .join(
+      (enter) =>
+        enter
+          .append("rect")
+          .attr("class", "temp_rect")
+          .style("fill", (d) => custom_colorScale(d))
+          .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
+          .attr("width", xScale.bandwidth())
+          .attr("height", 0)
+          .attr("x", (d) => xScale(xValue(d)))
+          .attr("y", innerHeight)
+          .call((enter) =>
+            enter
+              .transition(t3)
+              .attr(
+                "height",
+                (d) => innerHeight - yScale(d.hist_y1 - d.hist_y0)
+              )
+              .attr("y", (d) => yScale(yValue(d)))
+          ),
+      (update) =>
+        update.call((update) =>
+          update
+            .transition(t2)
+            .delay((d, i) => i)
+            .style("fill", (d) => custom_colorScale(d))
+            .attr("width", xScale.bandwidth())
+            .attr("rx", 0)
+            .attr("ry", 0)
+            .attr("x", (d) => xScale(xValue(d)))
+            .transition(t)
             .attr("height", (d) => innerHeight - yScale(d.hist_y1 - d.hist_y0))
             .attr("y", (d) => yScale(yValue(d)))
         ),
-    (update) =>
-      update.call((update) =>
-        update
-          .transition(t2)
-          .delay((d, i) => i)
-          .style("fill", (d) => custom_colorScale(d))
-          .attr("width", xScale.bandwidth())
-          .attr("rx", 0)
-          .attr("ry", 0)
-          .attr("x", (d) => xScale(xValue(d)))
-          .transition(t)
-          .attr("height", (d) => innerHeight - yScale(d.hist_y1 - d.hist_y0))
-          .attr("y", (d) => yScale(yValue(d)))
-      ),
-    (exit) =>
-      exit.call((exit) =>
-        exit.transition(t).attr("y", innerHeight).attr("height", 0).remove()
-      )
-  );
+      (exit) =>
+        exit.call((exit) =>
+          exit.transition(t).attr("y", innerHeight).attr("height", 0).remove()
+        )
+    )
+    .on("mouseover", (e, d) => {
+      tooltip
+        .style("display", "block")
+        .html(() => `${dateFormat(d.date)} <b>${d.value_final}°</b>`);
+    })
+    .on("mousemove", (e, d) => {
+      tooltip
+        .style("left", d3.pointer(e)[0] + 25 + margin.left + "px")
+        .style("top", d3.pointer(e)[1] - 25 + margin.top + "px");
+    })
+    .on("mouseout", () => {
+      tooltip.style("display", "none");
+    });
 }
 
 async function Histgram2(aqdata, container) {
@@ -229,41 +246,58 @@ async function Histgram2(aqdata, container) {
 
   const temp_rect = g1.selectAll("rect").data(data, (d) => `${d.day_of_year}`);
 
-  temp_rect.join(
-    (enter) =>
-      enter
-        .append("rect")
-        .attr("class", "temp_rect")
-        .style("fill", (d) => custom_colorScale(d))
-        .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
-        .attr("width", xScale.bandwidth())
-        .attr("height", 0)
-        .attr("x", (d) => xScale(xValue(d)))
-        .attr("y", innerHeight)
-        .call((enter) =>
-          enter
-            .transition(t3)
+  temp_rect
+    .join(
+      (enter) =>
+        enter
+          .append("rect")
+          .attr("class", "temp_rect")
+          .style("fill", (d) => custom_colorScale(d))
+          .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
+          .attr("width", xScale.bandwidth())
+          .attr("height", 0)
+          .attr("x", (d) => xScale(xValue(d)))
+          .attr("y", innerHeight)
+          .call((enter) =>
+            enter
+              .transition(t3)
+              .attr(
+                "height",
+                (d) => innerHeight - yScale(d.hist_y1 - d.hist_y0)
+              )
+              .attr("y", (d) => yScale(yValue(d)))
+          ),
+      (update) =>
+        update.call((update) =>
+          update
+            .transition(t2)
+            .style("fill", (d) => custom_colorScale(d))
+            .attr("width", xScale.bandwidth())
+            .attr("rx", 0)
+            .attr("ry", 0)
+            .attr("x", (d) => xScale(xValue(d)))
+            .transition(t)
             .attr("height", (d) => innerHeight - yScale(d.hist_y1 - d.hist_y0))
             .attr("y", (d) => yScale(yValue(d)))
         ),
-    (update) =>
-      update.call((update) =>
-        update
-          .transition(t2)
-          .style("fill", (d) => custom_colorScale(d))
-          .attr("width", xScale.bandwidth())
-          .attr("rx", 0)
-          .attr("ry", 0)
-          .attr("x", (d) => xScale(xValue(d)))
-          .transition(t)
-          .attr("height", (d) => innerHeight - yScale(d.hist_y1 - d.hist_y0))
-          .attr("y", (d) => yScale(yValue(d)))
-      ),
-    (exit) =>
-      exit.call((exit) =>
-        exit.transition(t).attr("y", innerHeight).attr("height", 0).remove()
-      )
-  );
+      (exit) =>
+        exit.call((exit) =>
+          exit.transition(t).attr("y", innerHeight).attr("height", 0).remove()
+        )
+    )
+    .on("mouseover", (e, d) => {
+      tooltip
+        .style("display", "block")
+        .html(() => `${dateFormat(d.date)} <b>${d.value_final}°</b>`);
+    })
+    .on("mousemove", (e, d) => {
+      tooltip
+        .style("left", d3.pointer(e)[0] + 25 + margin.left + "px")
+        .style("top", d3.pointer(e)[1] - 25 + margin.top + "px");
+    })
+    .on("mouseout", () => {
+      tooltip.style("display", "none");
+    });
 }
 
 export { Histgram, Histgram2 };

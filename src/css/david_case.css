@@ -34,6 +34,7 @@
 
 .temp_line:hover {
   stroke: var(--primary);
+  stroke-width: 4px;
   stroke-linecap: round;
 }
 

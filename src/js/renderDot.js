@@ -11,7 +11,7 @@ const colorScale = d3
   .interpolator(
     d3.interpolateRgb("hsla(120, 0%, 83%, 0.5)", "hsla(0, 0%, 33%, 1.00)")
   );
-
+const dateFormat = d3.timeFormat("%e %B %Y");
 const colorValue = (d) => d.year;
 
 const selected_date_string = localStorage.getItem("selected_date_string");
@@ -150,8 +150,6 @@ async function DotPlot(aqdata, container) {
     .selectAll("rect")
     .data(data, (d) => `${d.year}_${d.day_of_year}`);
 
-  const dateFormat = d3.timeFormat("%e %B %Y");
-
   temp_rect
     .join(
       (enter) =>
@@ -285,51 +283,65 @@ async function DotPlot_dodge(aqdata, container) {
     .selectAll("rect")
     .data(data, (d) => `${d.year}_${d.day_of_year}`);
 
-  temp_rect.join(
-    (enter) =>
-      enter
-        .append("rect")
-        .attr("class", "temp_rect")
-        .style("fill", (d) => custom_colorScale(d))
-        .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
-        .attr("rx", (d) => mark_size)
-        .attr("ry", (d) => mark_size)
-        .attr("width", (d) => mark_size)
-        .attr("height", (d) => mark_size)
-        .attr("x", (d) => dodgexScale(d))
-        .attr("y", -innerHeight)
-        .call((enter) =>
-          enter
-            .transition(t3)
+  temp_rect
+    .join(
+      (enter) =>
+        enter
+          .append("rect")
+          .attr("class", "temp_rect")
+          .style("fill", (d) => custom_colorScale(d))
+          .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
+          .attr("rx", (d) => mark_size)
+          .attr("ry", (d) => mark_size)
+          .attr("width", (d) => mark_size)
+          .attr("height", (d) => mark_size)
+          .attr("x", (d) => dodgexScale(d))
+          .attr("y", -innerHeight)
+          .call((enter) =>
+            enter
+              .transition(t3)
+              .delay((d, i) => i)
+              .ease(d3.easeBounceOut)
+              .attr("y", (d) => dodgeyScale(d))
+          ),
+      (update) =>
+        update.call((update) =>
+          update
+            .transition(t)
             .delay((d, i) => i)
+            .style("fill", (d) => custom_colorScale(d))
+            .attr("width", (d) => mark_size)
+            .attr("height", (d) => mark_size)
+            .attr("rx", (d) => mark_size)
+            .attr("ry", (d) => mark_size)
+            .attr("x", (d) => dodgexScale(d))
+            .transition()
             .ease(d3.easeBounceOut)
             .attr("y", (d) => dodgeyScale(d))
         ),
-    (update) =>
-      update.call((update) =>
-        update
-          .transition(t)
-          .delay((d, i) => i)
-          .style("fill", (d) => custom_colorScale(d))
-          .attr("width", (d) => mark_size)
-          .attr("height", (d) => mark_size)
-          .attr("rx", (d) => mark_size)
-          .attr("ry", (d) => mark_size)
-          .attr("x", (d) => dodgexScale(d))
-          .transition()
-          .ease(d3.easeBounceOut)
-          .attr("y", (d) => dodgeyScale(d))
-      ),
-    (exit) =>
-      exit.call((exit) =>
-        exit
-          .transition(t)
-          .ease(d3.easeCubicOut)
-          .delay((d, i) => i)
-          .attr("y", innerHeight * 2)
-          .remove()
-      )
-  );
+      (exit) =>
+        exit.call((exit) =>
+          exit
+            .transition(t)
+            .ease(d3.easeCubicOut)
+            .delay((d, i) => i)
+            .attr("y", innerHeight * 2)
+            .remove()
+        )
+    )
+    .on("mouseover", (e, d) => {
+      tooltip
+        .style("display", "block")
+        .html(() => `${dateFormat(d.date)} <b>${d.value_final}°</b>`);
+    })
+    .on("mousemove", (e, d) => {
+      tooltip
+        .style("left", d3.pointer(e)[0] + 25 + margin.left + "px")
+        .style("top", d3.pointer(e)[1] - 25 + margin.top + "px");
+    })
+    .on("mouseout", () => {
+      tooltip.style("display", "none");
+    });
 }
 
 async function DotPlot_dodge2(aqdata, container) {
@@ -415,50 +427,64 @@ async function DotPlot_dodge2(aqdata, container) {
     }
   };
 
-  temp_rect.join(
-    (enter) =>
-      enter
-        .append("rect")
-        .attr("class", "temp_rect")
-        .style("fill", (d) => custom_colorScale(d))
-        .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
-        .attr("rx", (d) => mark_size)
-        .attr("ry", (d) => mark_size)
-        .attr("width", (d) => mark_size)
-        .attr("height", (d) => mark_size)
-        .attr("x", (d) => dodgexScale(d))
-        .attr("y", -innerHeight)
-        .call((enter) =>
-          enter
-            .transition(t3)
-            .delay((d, i) => i)
-            .ease(d3.easeBounceOut)
-            .attr("y", (d) => dodgeyScale(d))
-        ),
-    (update) =>
-      update.call((update) =>
-        update
-          .transition(t2)
+  temp_rect
+    .join(
+      (enter) =>
+        enter
+          .append("rect")
+          .attr("class", "temp_rect")
           .style("fill", (d) => custom_colorScale(d))
-          .attr("width", (d) => mark_size)
-          .attr("height", (d) => mark_size)
+          .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
           .attr("rx", (d) => mark_size)
           .attr("ry", (d) => mark_size)
+          .attr("width", (d) => mark_size)
+          .attr("height", (d) => mark_size)
           .attr("x", (d) => dodgexScale(d))
-          .transition()
-          .easeVarying(smart_ease)
-          .attr("y", (d) => dodgeyScale(d))
-      ),
-    (exit) =>
-      exit.call((exit) =>
-        exit
-          .transition(t)
-          .ease(d3.easeCubicOut)
-          .delay((d, i) => i)
-          .attr("y", innerHeight * 2)
-          .remove()
-      )
-  );
+          .attr("y", -innerHeight)
+          .call((enter) =>
+            enter
+              .transition(t3)
+              .delay((d, i) => i)
+              .ease(d3.easeBounceOut)
+              .attr("y", (d) => dodgeyScale(d))
+          ),
+      (update) =>
+        update.call((update) =>
+          update
+            .transition(t2)
+            .style("fill", (d) => custom_colorScale(d))
+            .attr("width", (d) => mark_size)
+            .attr("height", (d) => mark_size)
+            .attr("rx", (d) => mark_size)
+            .attr("ry", (d) => mark_size)
+            .attr("x", (d) => dodgexScale(d))
+            .transition()
+            .easeVarying(smart_ease)
+            .attr("y", (d) => dodgeyScale(d))
+        ),
+      (exit) =>
+        exit.call((exit) =>
+          exit
+            .transition(t)
+            .ease(d3.easeCubicOut)
+            .delay((d, i) => i)
+            .attr("y", innerHeight * 2)
+            .remove()
+        )
+    )
+    .on("mouseover", (e, d) => {
+      tooltip
+        .style("display", "block")
+        .html(() => `${dateFormat(d.date)} <b>${d.value_final}°</b>`);
+    })
+    .on("mousemove", (e, d) => {
+      tooltip
+        .style("left", d3.pointer(e)[0] + 25 + margin.left + "px")
+        .style("top", d3.pointer(e)[1] - 25 + margin.top + "px");
+    })
+    .on("mouseout", () => {
+      tooltip.style("display", "none");
+    });
 }
 
 export { DotPlot, DotPlot_dodge, DotPlot_dodge2 };
