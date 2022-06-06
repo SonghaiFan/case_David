@@ -197,7 +197,7 @@ async function DotPlot(aqdata, container) {
     .on("mouseover", (e, d) => {
       tooltip
         .style("display", "block")
-        .html(() => `<b>${dateFormat(d.date)} </b>${d.value_final}°`);
+        .html(() => `${dateFormat(d.date)} <b>${d.value_final}°</b>`);
     })
     .on("mousemove", (e, d) => {
       tooltip
