@@ -86,11 +86,9 @@ async function DotPlot(aqdata, container) {
     innerHeight = height - margin.top - margin.bottom;
 
   const data = aqdata
-    .select("date", "year", "decade", "day_of_year", "value_final")
+    // .select("date", "year", "decade", "day_of_year", "value_final")
     .orderby(aq.desc("date"))
     .objects();
-
-  console.log(data);
 
   const svg = container.select("svg");
   const tooltip = container.select("#tooltipContainer");
@@ -115,9 +113,12 @@ async function DotPlot(aqdata, container) {
     gx = svg.select(".xAxisLayer"),
     gy = svg.select(".yAxisLayer");
 
-  g1.attr("transform", `translate(${margin.left},${margin.top})`);
-  gx.attr("transform", `translate(${margin.left},${innerHeight + margin.top})`);
-  gy.attr("transform", `translate(${margin.left},${margin.top})`);
+  g1.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
+  gx.transition(t).attr(
+    "transform",
+    `translate(${margin.left},${innerHeight + margin.top})`
+  );
+  gy.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
 
   const mark_size = 10;
 
@@ -201,7 +202,7 @@ async function DotPlot_dodge(aqdata, container) {
     innerHeight = height - margin.top - margin.bottom;
 
   const data = aqdata
-    .select("date", "year", "decade", "day_of_year", "value_final")
+    // .select("date", "year", "decade", "day_of_year", "value_final")
     .orderby(aq.desc("date"))
     .derive({ index: (d) => op.row_number() - 1 })
     .objects();
@@ -228,8 +229,11 @@ async function DotPlot_dodge(aqdata, container) {
       (exit) => exit.classed("is-active", false)
     );
 
-  g1.attr("transform", `translate(${margin.left},${margin.top})`);
-  gx.attr("transform", `translate(${margin.left},${innerHeight + margin.top})`);
+  g1.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
+  gx.transition(t).attr(
+    "transform",
+    `translate(${margin.left},${innerHeight + margin.top})`
+  );
 
   const mark_size = 10;
   const padding = 0;
@@ -303,4 +307,116 @@ async function DotPlot_dodge(aqdata, container) {
   );
 }
 
-export { DotPlot, DotPlot_dodge };
+async function DotPlot_dodge2(aqdata, container) {
+  const { width, height } = container.node().getBoundingClientRect();
+
+  const margin = {
+      top: 30,
+      right: 30,
+      bottom: 30,
+      left: 30,
+    },
+    innerWidth = width - margin.left - margin.right,
+    innerHeight = height - margin.top - margin.bottom;
+
+  const data = aqdata
+    // .select("date", "year", "decade", "day_of_year", "value_final")
+    .orderby(aq.desc("date"))
+    .derive({ index: (d) => op.row_number() - 1 })
+    .objects();
+
+  const svg = container.select("svg");
+  const tooltip = container.select("#tooltipContainer");
+
+  const smart_duration = data.length < 100 ? 1500 : 750;
+
+  const t = svg.transition().duration(smart_duration);
+  const t2 = t.transition().duration(smart_duration);
+  const t3 = t.transition().duration(smart_duration);
+
+  const usedLayters = ["figureLayer1", "xAxisLayer"];
+
+  const g1 = svg.select(".figureLayer1"),
+    gx = svg.select(".xAxisLayer");
+
+  const layers = svg
+    .selectAll("g")
+    .data(usedLayters, (d) => d)
+    .join(
+      (enter) => enter,
+      (update) => update.classed("is-active", true),
+      (exit) => exit.classed("is-active", false)
+    );
+
+  g1.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
+  gx.transition(t).attr(
+    "transform",
+    `translate(${margin.left},${innerHeight + margin.top})`
+  );
+
+  const mark_size = 10;
+  const padding = 0;
+
+  const xValue = (d) => d.value_final;
+
+  const xScale = d3
+    .scaleLinear()
+    .domain(d3.extent(data, xValue))
+    .range([0, innerWidth]);
+
+  const X = d3.map(data, xValue).map((x) => (x == null ? NaN : +x));
+  const I = d3.range(X.length).filter((i) => !isNaN(X[i]));
+  const Y = dodge(
+    I.map((i) => xScale(X[i])),
+    mark_size + padding
+  );
+
+  const dodgeyScale = (d) => innerHeight - mark_size - Y[d.index];
+  const dodgexScale = (d) => xScale(X[d.index]);
+
+  gx.transition(t).call(d3.axisBottom(xScale));
+
+  const temp_rect = g1
+    .selectAll("rect")
+    .data(data, (d) => `${d.year}_${d.day_of_year}`);
+
+  temp_rect.join(
+    (enter) =>
+      enter
+        .append("rect")
+        .attr("class", "temp_rect")
+        .style("fill", (d) => custom_colorScale(d))
+        .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
+        .attr("rx", (d) => mark_size)
+        .attr("ry", (d) => mark_size)
+        .attr("width", (d) => 0)
+        .attr("height", (d) => 0)
+        .attr("x", (d) => dodgexScale(d))
+        .attr("y", (d) => dodgeyScale(d))
+        .call((enter) =>
+          enter
+            .transition(t3)
+            .attr("width", (d) => mark_size)
+            .attr("height", (d) => mark_size)
+        ),
+    (update) =>
+      update.call((update) =>
+        update
+          .transition(t2)
+          .delay((d, i) => i)
+          .style("fill", (d) => custom_colorScale(d))
+          .attr("width", (d) => mark_size)
+          .attr("height", (d) => mark_size)
+          .attr("rx", (d) => mark_size)
+          .attr("ry", (d) => mark_size)
+          .attr("x", (d) => dodgexScale(d))
+          .transition(t)
+          .ease(d3.easeBounceOut)
+          .attr("y", (d) => dodgeyScale(d))
+      ),
+    (exit) =>
+      exit.call((exit) => exit.transition(t).attr("width", 0).attr("height", 0))
+  );
+}
+
+export { DotPlot, DotPlot_dodge, DotPlot_dodge2 };

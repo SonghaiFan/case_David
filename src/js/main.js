@@ -1,7 +1,7 @@
 import UnitChart from "./UnitChart.js";
 import { BubbleMap } from "./renderMap.js";
 import { LineChart, LineChart_Dot } from "./renderLine.js";
-import { DotPlot, DotPlot_dodge } from "./renderDot.js";
+import { DotPlot, DotPlot_dodge, DotPlot_dodge2 } from "./renderDot.js";
 
 const figures = d3.selectAll(".figure");
 const article = d3.selectAll(".article");
@@ -56,7 +56,7 @@ const dayOfYear = (date) =>
     (date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)
   );
 
-const selected_date_string = "2013-7-21";
+const selected_date_string = "1994-7-21";
 localStorage.setItem("selected_date_string", selected_date_string);
 
 const selected_date = new Date(selected_date_string);
@@ -132,14 +132,14 @@ function stepTrigger(index) {
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.occasional_frequency != "Frequent")),
+          .filter(aq.escape((d) => d.temp_percentile >= 95)),
         fig1
       );
       DotPlot(
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.occasional_frequency != "Frequent")),
+          .filter(aq.escape((d) => d.temp_percentile >= 95)),
         fig1
       );
       break;
@@ -148,20 +148,26 @@ function stepTrigger(index) {
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.occasional_frequency != "Frequent")),
+          .filter(aq.escape((d) => d.temp_percentile >= 95)),
         fig1
       );
       break;
     case 9:
-      DotPlot_dodge(
+      DotPlot_dodge2(
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.occasional_frequency != "Frequent")),
+          .filter(aq.escape((d) => d.temp_percentile >= 95)),
         fig1
       );
       break;
     case 10:
+      DotPlot_dodge2(
+        tdataPOI
+          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
+        fig1
+      );
       break;
     case 11:
       break;

@@ -72,8 +72,6 @@ async function LineChart(aqdata, container) {
     .orderby(aq.desc("date"))
     .objects();
 
-  console.log(data);
-
   const svg = container.select("svg");
   const tooltip = container.select("#tooltipContainer");
 
@@ -185,15 +183,6 @@ async function LineChart(aqdata, container) {
 async function LineChart_Dot(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
-  const primary_color = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--primary");
-
-  const { h, s, l } = d3.hsl(primary_color);
-  Math.round(h);
-
-  console.log(d3.hsl(primary_color));
-
   const margin = {
       top: 200,
       right: 30,
@@ -227,8 +216,6 @@ async function LineChart_Dot(aqdata, container) {
     })
     .orderby(aq.desc("date"))
     .objects();
-
-  console.log(data);
 
   const svg = container.select("svg");
   const tooltip = container.select("#tooltipContainer");
