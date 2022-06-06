@@ -1,7 +1,8 @@
-import UnitChart from "./UnitChart.js";
-import { BubbleMap } from "./renderMap.js";
-import { LineChart, LineChart_Dot } from "./renderLine.js";
-import { DotPlot, DotPlot_dodge, DotPlot_dodge2 } from "./renderDot.js";
+import UnitChart from "./src/js/UnitChart.js";
+import { BubbleMap } from "./src/js/renderMap.js";
+import { LineChart, LineChart_Dot } from "./src/js/renderLine.js";
+import { DotPlot, DotPlot_dodge, DotPlot_dodge2 } from "./src/js/renderDot.js";
+import { Histgram, Histgram2 } from "./src/js/renderBar.js";
 
 const figures = d3.selectAll(".figure");
 const article = d3.selectAll(".article");
@@ -170,10 +171,23 @@ function stepTrigger(index) {
       );
       break;
     case 11:
+      Histgram(
+        tdataPOI
+          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
+        fig1
+      );
       break;
     case 12:
+      Histgram2(tdataPOI.filter(aq.escape((d) => d.year == 1910)), fig1);
       break;
     case 13:
+      Histgram2(
+        tdataPOI.filter(
+          aq.escape((d) => d.year == selected_date.getFullYear())
+        ),
+        fig1
+      );
       break;
   }
 }

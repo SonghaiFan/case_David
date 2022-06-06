@@ -2,6 +2,8 @@ const primary_color = getComputedStyle(
   document.documentElement
 ).getPropertyValue("--primary");
 
+const tooltip = d3.select("#tooltipContainer1");
+
 const colorScale = d3
   .scaleSequentialPow()
   .exponent(8)
@@ -91,12 +93,12 @@ async function DotPlot(aqdata, container) {
     .objects();
 
   const svg = container.select("svg");
-  const tooltip = container.select("#tooltipContainer");
 
   const smart_duration = data.length < 100 ? 1500 : 750;
 
   const t = svg.transition().duration(smart_duration);
   const t2 = t.transition().duration(smart_duration);
+  const t3 = t.transition().duration(smart_duration);
 
   const usedLayters = ["figureLayer1", "xAxisLayer", "yAxisLayer"];
 
@@ -148,45 +150,63 @@ async function DotPlot(aqdata, container) {
     .selectAll("rect")
     .data(data, (d) => `${d.year}_${d.day_of_year}`);
 
-  temp_rect.join(
-    (enter) =>
-      enter
-        .append("rect")
-        .attr("class", "temp_rect")
-        .style("fill", (d) => custom_colorScale(d))
-        .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
-        .attr("rx", (d) => mark_size)
-        .attr("ry", (d) => mark_size)
-        .attr("width", (d) => mark_size)
-        .attr("height", (d) => mark_size)
-        .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
-        .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
-        .call((enter) =>
-          enter
-            .transition(t)
-            .attr("rx", (d) => mark_size)
-            .attr("ry", (d) => mark_size)
-            .attr("width", (d) => mark_size)
-            .attr("height", (d) => mark_size)
-            .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
-            .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
-        ),
-    (update) =>
-      update.call((update) =>
-        update
-          .transition(t)
+  const dateFormat = d3.timeFormat("%e %B %Y");
+
+  temp_rect
+    .join(
+      (enter) =>
+        enter
+          .append("rect")
+          .attr("class", "temp_rect")
           .style("fill", (d) => custom_colorScale(d))
-          .attr("width", (d) => mark_size)
-          .attr("height", (d) => mark_size)
+          .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
           .attr("rx", (d) => mark_size)
           .attr("ry", (d) => mark_size)
+          .attr("width", (d) => mark_size)
+          .attr("height", (d) => mark_size)
           .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
-          .transition(t)
           .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
-      ),
-    (exit) =>
-      exit.call((exit) => exit.transition(t).attr("width", 0).attr("height", 0))
-  );
+          .call((enter) =>
+            enter
+              .transition(t)
+              .attr("rx", (d) => mark_size)
+              .attr("ry", (d) => mark_size)
+              .attr("width", (d) => mark_size)
+              .attr("height", (d) => mark_size)
+              .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
+              .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
+          ),
+      (update) =>
+        update.call((update) =>
+          update
+            .transition(t)
+            .style("fill", (d) => custom_colorScale(d))
+            .attr("width", (d) => mark_size)
+            .attr("height", (d) => mark_size)
+            .attr("rx", (d) => mark_size)
+            .attr("ry", (d) => mark_size)
+            .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
+            .transition(t)
+            .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
+        ),
+      (exit) =>
+        exit.call((exit) =>
+          exit.transition(t).attr("width", 0).attr("height", 0)
+        )
+    )
+    .on("mouseover", (e, d) => {
+      tooltip
+        .style("display", "block")
+        .html(() => `<b>${dateFormat(d.date)} </b>${d.value_final}°`);
+    })
+    .on("mousemove", (e, d) => {
+      tooltip
+        .style("left", d3.pointer(e)[0] + 25 + margin.left + "px")
+        .style("top", d3.pointer(e)[1] - 25 + margin.top + "px");
+    })
+    .on("mouseout", () => {
+      tooltip.style("display", "none");
+    });
 }
 
 async function DotPlot_dodge(aqdata, container) {
@@ -208,12 +228,13 @@ async function DotPlot_dodge(aqdata, container) {
     .objects();
 
   const svg = container.select("svg");
-  const tooltip = container.select("#tooltipContainer");
+  // const tooltip = container.select("#tooltipContainer");
 
   const smart_duration = data.length < 100 ? 1500 : 750;
 
   const t = svg.transition().duration(smart_duration);
   const t2 = t.transition().duration(smart_duration);
+  const t3 = t.transition().duration(smart_duration);
 
   const usedLayters = ["figureLayer1", "xAxisLayer"];
 
@@ -276,15 +297,12 @@ async function DotPlot_dodge(aqdata, container) {
         .attr("width", (d) => mark_size)
         .attr("height", (d) => mark_size)
         .attr("x", (d) => dodgexScale(d))
-        .attr("y", (d) => dodgeyScale(d))
+        .attr("y", -innerHeight)
         .call((enter) =>
           enter
-            .transition(t)
-            .attr("rx", (d) => mark_size)
-            .attr("ry", (d) => mark_size)
-            .attr("width", (d) => mark_size)
-            .attr("height", (d) => mark_size)
-            .attr("x", (d) => dodgexScale(d))
+            .transition(t3)
+            .delay((d, i) => i)
+            .ease(d3.easeBounceOut)
             .attr("y", (d) => dodgeyScale(d))
         ),
     (update) =>
@@ -298,12 +316,19 @@ async function DotPlot_dodge(aqdata, container) {
           .attr("rx", (d) => mark_size)
           .attr("ry", (d) => mark_size)
           .attr("x", (d) => dodgexScale(d))
-          .transition(t)
+          .transition()
           .ease(d3.easeBounceOut)
           .attr("y", (d) => dodgeyScale(d))
       ),
     (exit) =>
-      exit.call((exit) => exit.transition(t).attr("width", 0).attr("height", 0))
+      exit.call((exit) =>
+        exit
+          .transition(t)
+          .ease(d3.easeCubicOut)
+          .delay((d, i) => i)
+          .attr("y", innerHeight * 2)
+          .remove()
+      )
   );
 }
 
@@ -326,7 +351,7 @@ async function DotPlot_dodge2(aqdata, container) {
     .objects();
 
   const svg = container.select("svg");
-  const tooltip = container.select("#tooltipContainer");
+  // const tooltip = container.select("#tooltipContainer");
 
   const smart_duration = data.length < 100 ? 1500 : 750;
 
@@ -380,6 +405,16 @@ async function DotPlot_dodge2(aqdata, container) {
     .selectAll("rect")
     .data(data, (d) => `${d.year}_${d.day_of_year}`);
 
+  const smart_ease = function (d, i, n) {
+    const orig_y = this.getAttribute("y");
+    const targ_y = dodgeyScale(d);
+    if (orig_y < targ_y) {
+      return d3.easeBounceOut;
+    } else {
+      return d3.easeCubicOut;
+    }
+  };
+
   temp_rect.join(
     (enter) =>
       enter
@@ -389,33 +424,40 @@ async function DotPlot_dodge2(aqdata, container) {
         .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
         .attr("rx", (d) => mark_size)
         .attr("ry", (d) => mark_size)
-        .attr("width", (d) => 0)
-        .attr("height", (d) => 0)
+        .attr("width", (d) => mark_size)
+        .attr("height", (d) => mark_size)
         .attr("x", (d) => dodgexScale(d))
-        .attr("y", (d) => dodgeyScale(d))
+        .attr("y", -innerHeight)
         .call((enter) =>
           enter
             .transition(t3)
-            .attr("width", (d) => mark_size)
-            .attr("height", (d) => mark_size)
+            .delay((d, i) => i)
+            .ease(d3.easeBounceOut)
+            .attr("y", (d) => dodgeyScale(d))
         ),
     (update) =>
       update.call((update) =>
         update
           .transition(t2)
-          .delay((d, i) => i)
           .style("fill", (d) => custom_colorScale(d))
           .attr("width", (d) => mark_size)
           .attr("height", (d) => mark_size)
           .attr("rx", (d) => mark_size)
           .attr("ry", (d) => mark_size)
           .attr("x", (d) => dodgexScale(d))
-          .transition(t)
-          .ease(d3.easeBounceOut)
+          .transition()
+          .easeVarying(smart_ease)
           .attr("y", (d) => dodgeyScale(d))
       ),
     (exit) =>
-      exit.call((exit) => exit.transition(t).attr("width", 0).attr("height", 0))
+      exit.call((exit) =>
+        exit
+          .transition(t)
+          .ease(d3.easeCubicOut)
+          .delay((d, i) => i)
+          .attr("y", innerHeight * 2)
+          .remove()
+      )
   );
 }
 

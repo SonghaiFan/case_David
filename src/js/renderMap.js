@@ -11,7 +11,7 @@ async function BubbleMap(data, container) {
     innerHeight = height - margin.top - margin.bottom;
 
   const svg = container.select("svg");
-  const tooltip = container.select("#tooltipContainer");
+  const tooltip = container.select("#tooltipContainer_map");
 
   const world_url = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 
