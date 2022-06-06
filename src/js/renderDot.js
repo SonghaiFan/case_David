@@ -71,6 +71,8 @@ function dodge(X, radius) {
   return Y;
 }
 
+const mark_size = 10;
+
 async function DotPlot(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
@@ -117,6 +119,8 @@ async function DotPlot(aqdata, container) {
   gx.attr("transform", `translate(${margin.left},${innerHeight + margin.top})`);
   gy.attr("transform", `translate(${margin.left},${margin.top})`);
 
+  const mark_size = 10;
+
   const xValue = (d) => d.day_of_year;
   const yValue = (d) => d.value_final;
 
@@ -138,8 +142,6 @@ async function DotPlot(aqdata, container) {
       .tickFormat(d3.format("~s"))
       .ticks(Math.round(width / 100))
   );
-
-  const mark_size = 15;
 
   const temp_rect = g1
     .selectAll("rect")
@@ -178,6 +180,7 @@ async function DotPlot(aqdata, container) {
           .attr("rx", (d) => mark_size)
           .attr("ry", (d) => mark_size)
           .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
+          .transition(t)
           .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
       ),
     (exit) =>
@@ -228,7 +231,7 @@ async function DotPlot_dodge(aqdata, container) {
   g1.attr("transform", `translate(${margin.left},${margin.top})`);
   gx.attr("transform", `translate(${margin.left},${innerHeight + margin.top})`);
 
-  const mark_size = 15;
+  const mark_size = 10;
   const padding = 0;
 
   const xValue = (d) => d.year;
@@ -245,8 +248,11 @@ async function DotPlot_dodge(aqdata, container) {
   const I = d3.range(X.length).filter((i) => !isNaN(X[i]));
   const Y = dodge(
     I.map((i) => xScale(X[i])),
-    mark_size * 2 + padding
+    mark_size + padding
   );
+
+  const dodgeyScale = (d) => innerHeight - mark_size - Y[d.index];
+  const dodgexScale = (d) => xScale(X[d.index]);
 
   gx.transition(t).call(d3.axisBottom(xScale));
 
@@ -265,11 +271,8 @@ async function DotPlot_dodge(aqdata, container) {
         .attr("ry", (d) => mark_size)
         .attr("width", (d) => mark_size)
         .attr("height", (d) => mark_size)
-        .attr("x", (d) => xScale(X[d.index]) - mark_size / 2)
-        .attr(
-          "y",
-          (d) => innerHeight - mark_size - padding - Y[d.index] - mark_size / 2
-        )
+        .attr("x", (d) => dodgexScale(d))
+        .attr("y", (d) => dodgeyScale(d))
         .call((enter) =>
           enter
             .transition(t)
@@ -277,28 +280,23 @@ async function DotPlot_dodge(aqdata, container) {
             .attr("ry", (d) => mark_size)
             .attr("width", (d) => mark_size)
             .attr("height", (d) => mark_size)
-            .attr("x", (d) => xScale(X[d.index]) - mark_size / 2)
-            .attr(
-              "y",
-              (d) =>
-                innerHeight - mark_size - padding - Y[d.index] - mark_size / 2
-            )
+            .attr("x", (d) => dodgexScale(d))
+            .attr("y", (d) => dodgeyScale(d))
         ),
     (update) =>
       update.call((update) =>
         update
           .transition(t)
+          .delay((d, i) => i)
           .style("fill", (d) => custom_colorScale(d))
           .attr("width", (d) => mark_size)
           .attr("height", (d) => mark_size)
           .attr("rx", (d) => mark_size)
           .attr("ry", (d) => mark_size)
-          .attr("x", (d) => xScale(X[d.index]) - mark_size / 2)
-          .attr(
-            "y",
-            (d) =>
-              innerHeight - mark_size - padding - Y[d.index] - mark_size / 2
-          )
+          .attr("x", (d) => dodgexScale(d))
+          .transition(t)
+          .ease(d3.easeBounceOut)
+          .attr("y", (d) => dodgeyScale(d))
       ),
     (exit) =>
       exit.call((exit) => exit.transition(t).attr("width", 0).attr("height", 0))

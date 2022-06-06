@@ -135,9 +135,16 @@ function stepTrigger(index) {
           .filter(aq.escape((d) => d.occasional_frequency != "Frequent")),
         fig1
       );
+      DotPlot(
+        tdataPOI
+          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
+          .filter(aq.escape((d) => d.occasional_frequency != "Frequent")),
+        fig1
+      );
       break;
     case 8:
-      DotPlot(
+      DotPlot_dodge(
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
