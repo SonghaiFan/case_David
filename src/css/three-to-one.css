@@ -57,6 +57,7 @@ svg {
 svg > .layer {
   opacity: 0;
   transition: ease-in-out 750ms;
+  transition-delay: 750ms;
   transition-property: opacity;
 }
 

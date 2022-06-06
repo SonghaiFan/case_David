@@ -114,12 +114,9 @@ async function DotPlot(aqdata, container) {
     gx = svg.select(".xAxisLayer"),
     gy = svg.select(".yAxisLayer");
 
-  g1.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
-  gx.transition(t).attr(
-    "transform",
-    `translate(${margin.left},${innerHeight + margin.top})`
-  );
-  gy.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
+  g1.attr("transform", `translate(${margin.left},${margin.top})`);
+  gx.attr("transform", `translate(${margin.left},${innerHeight + margin.top})`);
+  gy.attr("transform", `translate(${margin.left},${margin.top})`);
 
   const xValue = (d) => d.day_of_year;
   const yValue = (d) => d.value_final;
@@ -215,7 +212,10 @@ async function DotPlot_stack(aqdata, container) {
   const t = svg.transition().duration(smart_duration);
   const t2 = t.transition().duration(smart_duration);
 
-  const usedLayters = ["figureLayer1", "xAxisLayer", "yAxisLayer"];
+  const usedLayters = ["figureLayer1", "xAxisLayer"];
+
+  const g1 = svg.select(".figureLayer1"),
+    gx = svg.select(".xAxisLayer");
 
   const layers = svg
     .selectAll("g")
@@ -226,16 +226,8 @@ async function DotPlot_stack(aqdata, container) {
       (exit) => exit.classed("is-active", false)
     );
 
-  const g1 = svg.select(".figureLayer1"),
-    gx = svg.select(".xAxisLayer"),
-    gy = svg.select(".yAxisLayer");
-
-  g1.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
-  gx.transition(t).attr(
-    "transform",
-    `translate(${margin.left},${innerHeight + margin.top})`
-  );
-  gy.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
+  g1.attr("transform", `translate(${margin.left},${margin.top})`);
+  gx.attr("transform", `translate(${margin.left},${innerHeight + margin.top})`);
 
   // data.sort((a, b) => a.date - b.date);
 
@@ -253,13 +245,6 @@ async function DotPlot_stack(aqdata, container) {
     .range([0, innerWidth]);
 
   gx.transition(t).call(d3.axisBottom(xScale));
-
-  gy.transition(t).call(
-    d3
-      .axisLeft(yScale)
-      .tickFormat(d3.format("~s"))
-      .ticks(Math.round(width / 100))
-  );
 
   const mark_size = 15;
 
