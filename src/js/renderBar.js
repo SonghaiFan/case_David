@@ -17,6 +17,8 @@ const selected_date = new Date(selected_date_string);
 const selected_year = selected_date.getFullYear();
 const selected_decade = Math.round(selected_year / 10) * 10;
 
+const tooltip = d3.select("#tooltipContainer1");
+
 const custom_colorScale = function (d) {
   if (d.year == selected_year) {
     return primary_color;
@@ -51,7 +53,6 @@ async function Histgram(aqdata, container) {
   console.log(data);
 
   const svg = container.select("svg");
-  const tooltip = container.select("#tooltipContainer");
 
   const smart_duration = data.length < 100 ? 1500 : 750;
 
@@ -186,10 +187,7 @@ async function Histgram2(aqdata, container) {
     .orderby("bin")
     .objects();
 
-  console.log(data);
-
   const svg = container.select("svg");
-  const tooltip = container.select("#tooltipContainer");
 
   const smart_duration = data.length < 100 ? 1500 : 750;
 

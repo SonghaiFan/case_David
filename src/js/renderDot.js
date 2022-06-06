@@ -452,6 +452,7 @@ async function DotPlot_dodge2(aqdata, container) {
         update.call((update) =>
           update
             .transition(t2)
+            .delay((d, i) => i)
             .style("fill", (d) => custom_colorScale(d))
             .attr("width", (d) => mark_size)
             .attr("height", (d) => mark_size)
