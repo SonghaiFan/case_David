@@ -2,13 +2,38 @@ const primary_color = getComputedStyle(
   document.documentElement
 ).getPropertyValue("--primary");
 
-const { h, s, l } = d3.hsl(primary_color);
+// const { h, s, l } = d3.hsl(primary_color);
 
-const custom_interprator = (i) =>
-  `hsla(${h},
-    ${s * 100 * i}%, 
-    ${l * 100 + (50 - l * 100) * i}%,
-    ${0.2 + (1 - 0.2) * i})`;
+// const custom_interprator = (i) =>
+//   `hsla(${h},
+//     ${s * 100 * i}%,
+//     ${l * 100 + (50 - l * 100) * i}%,
+//     ${0.2 + (1 - 0.2) * i})`;
+
+const colorScale = d3
+  .scaleSequentialPow()
+  .exponent(8)
+  .domain([1910, 2022])
+  .interpolator(
+    d3.interpolateRgb("hsla(120, 0%, 83%, 0.5)", "hsla(0, 0%, 33%, 1.00)")
+  );
+
+const colorValue = (d) => d.year;
+
+const selected_date_string = localStorage.getItem("selected_date_string");
+const selected_date = new Date(selected_date_string);
+const selected_year = selected_date.getFullYear();
+const selected_decade = Math.round(selected_year / 10) * 10;
+
+const custom_colorScale = function (d) {
+  if (d.year == selected_year) {
+    return primary_color;
+  } else if (d.decade == selected_decade) {
+    return "#ffaa92";
+  } else {
+    return colorScale(colorValue(d));
+  }
+};
 
 async function LineChart(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
@@ -23,7 +48,7 @@ async function LineChart(aqdata, container) {
     innerHeight = height - margin.top - margin.bottom;
 
   const data = aqdata
-    .select("date", "year", "day_of_year", "value_final")
+    .select("date", "year", "decade", "day_of_year", "value_final")
     .groupby("year")
     .orderby("day_of_year")
     .derive({
@@ -85,7 +110,6 @@ async function LineChart(aqdata, container) {
   const y1Value = (d) => d.value_final;
   const x2Value = (d) => d.day_of_year_lead;
   const y2Value = (d) => d.value_final_lead;
-  const colorValue = (d) => d.year;
 
   const yScale = d3
     .scaleLinear()
@@ -96,17 +120,6 @@ async function LineChart(aqdata, container) {
     .scaleLinear()
     .domain(d3.extent(data, x1Value))
     .range([0, innerWidth]);
-
-  // const colorScale = d3
-  //   .scaleSequentialPow()
-  //   .exponent(8)
-  //   .domain([1910, 2022])
-  //   .interpolator(d3.interpolateReds);
-
-  const colorScale = d3
-    .scaleSequential()
-    .domain([1910, 2022])
-    .interpolator(custom_interprator);
 
   gx.transition(t)
     .call(d3.axisBottom(xScale))
@@ -136,7 +149,7 @@ async function LineChart(aqdata, container) {
           .attr("class", "temp_line")
           .attr("id", (d) => `temp_line'_${d.year}_${d.day_of_year}`)
           .style("opacity", 0)
-          .style("stroke", (d) => colorScale(colorValue(d)))
+          .style("stroke", (d) => custom_colorScale(d))
           .attr("x1", (d) => xScale(x1Value(d)))
           .attr("y1", (d) => yScale(y1Value(d)))
           .attr("x2", (d) => xScale(x1Value(d)))
@@ -156,7 +169,7 @@ async function LineChart(aqdata, container) {
           update
             .transition(t)
             .style("opacity", 1)
-            .style("stroke", (d) => colorScale(colorValue(d)))
+            .style("stroke", (d) => custom_colorScale(d))
             .style("stroke-width", "2px")
             .attr("x1", (d) => xScale(x1Value(d)))
             .attr("y1", (d) => yScale(y1Value(d)))
@@ -191,7 +204,7 @@ async function LineChart_Dot(aqdata, container) {
     innerHeight = height - margin.top - margin.bottom;
 
   const data = aqdata
-    .select("date", "year", "day_of_year", "value_final")
+    .select("date", "year", "decade", "day_of_year", "value_final")s
     .groupby("year")
     .orderby("day_of_year")
     .derive({
@@ -243,13 +256,8 @@ async function LineChart_Dot(aqdata, container) {
   );
   gy.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // data.sort((a, b) => a.date - b.date);
-
   const x1Value = (d) => d.day_of_year;
   const y1Value = (d) => d.value_final;
-  const x2Value = (d) => d.day_of_year_lead;
-  const y2Value = (d) => d.value_final_lead;
-  const colorValue = (d) => d.year;
 
   const yScale = d3
     .scaleLinear()
@@ -260,17 +268,6 @@ async function LineChart_Dot(aqdata, container) {
     .scaleLinear()
     .domain(d3.extent(data, x1Value))
     .range([0, innerWidth]);
-
-  // const colorScale = d3
-  //   .scaleSequentialPow()
-  //   .exponent(8)
-  //   .domain([1910, 2022])
-  //   .interpolator(d3.interpolateReds);
-
-  const colorScale = d3
-    .scaleSequential()
-    .domain([1900, 2050])
-    .interpolator(custom_interprator);
 
   gx.transition(t)
     .call(d3.axisBottom(xScale))
@@ -302,7 +299,7 @@ async function LineChart_Dot(aqdata, container) {
           .attr("class", "temp_line")
           .attr("id", (d) => `temp_line'_${d.year}_${d.day_of_year}`)
           .style("opacity", 0)
-          .style("stroke", (d) => colorScale(colorValue(d)))
+          .style("stroke", (d) => custom_colorScale(d))
           .attr("x1", (d) => xScale(x1Value(d)))
           .attr("y1", (d) => yScale(y1Value(d)))
           .attr("x2", (d) => xScale(x1Value(d)))
@@ -320,7 +317,7 @@ async function LineChart_Dot(aqdata, container) {
           update
             .transition(t)
             .style("opacity", 1)
-            .style("stroke", (d) => colorScale(colorValue(d)))
+            .style("stroke", (d) => custom_colorScale(d))
             .style("stroke-width", "10px")
             .attr("x1", (d) => xScale(x1Value(d)))
             .attr("y1", (d) => yScale(y1Value(d)))

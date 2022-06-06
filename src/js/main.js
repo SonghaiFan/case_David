@@ -1,7 +1,7 @@
 import UnitChart from "./UnitChart.js";
 import { BubbleMap } from "./renderMap.js";
 import { LineChart, LineChart_Dot } from "./renderLine.js";
-import { ScatterPlot } from "./renderDot.js";
+import { DotPlot, DotPlot_stack } from "./renderDot.js";
 
 const figures = d3.selectAll(".figure");
 const article = d3.selectAll(".article");
@@ -56,7 +56,9 @@ const dayOfYear = (date) =>
     (date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)
   );
 
-const selected_date_string = "2021-7-21";
+const selected_date_string = "2013-7-21";
+localStorage.setItem("selected_date_string", selected_date_string);
+
 const selected_date = new Date(selected_date_string);
 const selected_type = "tmax";
 
@@ -135,7 +137,7 @@ function stepTrigger(index) {
       );
       break;
     case 8:
-      ScatterPlot(
+      DotPlot(
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
@@ -144,6 +146,13 @@ function stepTrigger(index) {
       );
       break;
     case 9:
+      DotPlot_stack(
+        tdataPOI
+          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
+          .filter(aq.escape((d) => d.occasional_frequency != "Frequent")),
+        fig1
+      );
       break;
     case 10:
       break;
