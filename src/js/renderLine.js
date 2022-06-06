@@ -204,7 +204,7 @@ async function LineChart_Dot(aqdata, container) {
     innerHeight = height - margin.top - margin.bottom;
 
   const data = aqdata
-    .select("date", "year", "decade", "day_of_year", "value_final")s
+    .select("date", "year", "decade", "day_of_year", "value_final")
     .groupby("year")
     .orderby("day_of_year")
     .derive({
