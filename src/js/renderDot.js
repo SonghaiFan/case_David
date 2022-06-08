@@ -215,7 +215,7 @@ async function DotPlot_dodge(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const margin = {
-      top: 200,
+      top: 30,
       right: 100,
       bottom: 200,
       left: 30,
@@ -360,7 +360,7 @@ async function DotPlot_dodge2(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const margin = {
-      top: 100,
+      top: 30,
       right: 100,
       bottom: 100,
       left: 30,

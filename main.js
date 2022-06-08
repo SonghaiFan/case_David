@@ -57,7 +57,7 @@ const dayOfYear = (date) =>
     (date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)
   );
 
-const selected_date_string = "2013-3-21";
+const selected_date_string = "2020-3-21";
 localStorage.setItem("selected_date_string", selected_date_string);
 
 const selected_date = new Date(selected_date_string);

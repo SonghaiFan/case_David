@@ -1,3 +1,9 @@
+.intro {
+  background-image: linear-gradient(transparent, var(--bg-color)),
+    url(https://ichef.bbci.co.uk/news/976/cpsprodpb/1352B/production/_110574197_hi059274286.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
 .map_path {
   fill: var(--bgr-transparent-low);
   /* stroke: var(--font-color); */

@@ -118,9 +118,6 @@ input[type="button"].button-primary:focus {
   max-width: none;
   padding-top: 0;
   margin-bottom: 5rem;
-  background-image: linear-gradient(transparent, var(--bg-color)), url();
-  background-repeat: no-repeat;
-  background-size: cover;
 }
 
 .intro h1 {
@@ -133,7 +130,7 @@ input[type="button"].button-primary:focus {
   max-width: none;
   margin: 1rem auto;
   padding: 5rem auto;
-  background-color: var(--bgr-transparent-low);
+  /* background-color: var(--bgr-transparent-low); */
 }
 
 /* .outro {
@@ -370,7 +367,7 @@ input[type="button"].button-primary:focus {
   left: 0;
   right: 0;
   transition: 0.4s;
-  box-shadow: inset 0 0 5px var(--bgr-transparent-low);
+  box-shadow: inset 0 0 5px gray;
 }
 
 .slider:before {
