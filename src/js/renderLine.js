@@ -158,8 +158,8 @@ async function LineChart(aqdata, container) {
           .call((enter) =>
             enter
               .transition(t2)
-              .duration((d) => d.value_final_diff)
-              .delay((d) => d.value_final_diff_rolsum + (d.year - 1910) * 10)
+              .duration((d) => d.value_final_diff * 5)
+              .delay((d) => d.value_final_diff_rolsum + (d.year - 1910) * 250)
               .style("opacity", 1)
               .style("stroke-width", null)
               .attr("x2", (d) => xScale(x2Value(d)))
