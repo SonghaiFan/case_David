@@ -1,8 +1,8 @@
 function BubbleMap(data, svg, article) {
   const margin = {
-      top: 30,
-      right: 30,
-      bottom: 30,
+      top: 100,
+      right: 100,
+      bottom: 100,
       left: 30,
     },
     width = svg.attr("width") - margin.left - margin.right,

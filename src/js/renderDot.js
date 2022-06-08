@@ -14,6 +14,8 @@ const colorScale = d3
 const dateFormat = d3.timeFormat("%e %B %Y");
 const colorValue = (d) => d.year;
 
+let mark_size = 10;
+
 const selected_date_string = localStorage.getItem("selected_date_string");
 const selected_date = new Date(selected_date_string);
 const selected_year = selected_date.getFullYear();
@@ -29,7 +31,7 @@ const custom_colorScale = function (d) {
   }
 };
 
-function dodge(X, radius) {
+function dodge(X, radius, height) {
   const Y = new Float64Array(X.length);
   const radius2 = radius ** 2;
   const epsilon = 1e-3;
@@ -70,17 +72,21 @@ function dodge(X, radius) {
     else tail = tail.next = b;
   }
 
-  return Y;
+  if (height < d3.max(Y)) {
+    return height * 2 < d3.max(Y)
+      ? dodge(X, radius - 3, height)
+      : dodge(X, radius - 1, height);
+  } else {
+    return Y;
+  }
 }
-
-const mark_size = 10;
 
 async function DotPlot(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const margin = {
       top: 200,
-      right: 30,
+      right: 100,
       bottom: 200,
       left: 30,
     },
@@ -121,8 +127,6 @@ async function DotPlot(aqdata, container) {
     `translate(${margin.left},${innerHeight + margin.top})`
   );
   gy.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
-
-  const mark_size = 10;
 
   const xValue = (d) => d.day_of_year;
   const yValue = (d) => d.value_final;
@@ -212,7 +216,7 @@ async function DotPlot_dodge(aqdata, container) {
 
   const margin = {
       top: 200,
-      right: 30,
+      right: 100,
       bottom: 200,
       left: 30,
     },
@@ -254,30 +258,38 @@ async function DotPlot_dodge(aqdata, container) {
     `translate(${margin.left},${innerHeight + margin.top})`
   );
 
-  const mark_size = 10;
   const padding = 0;
 
   const xValue = (d) => d.year;
-  const yValue = (d) => d.value_final;
-  const iValue = (d) => d.index;
 
   const xScale = d3
     .scaleLinear()
-    .domain(d3.extent(data, xValue))
+    .domain([d3.min(data, xValue) - 1, d3.max(data, xValue) + 1])
     .range([0, innerWidth]);
 
   const X = d3.map(data, xValue).map((x) => (x == null ? NaN : +x));
   // Compute which data points are considered defined.
   const I = d3.range(X.length).filter((i) => !isNaN(X[i]));
-  const Y = dodge(
+  let Y = dodge(
     I.map((i) => xScale(X[i])),
-    mark_size + padding
+    mark_size + padding,
+    innerHeight
   );
 
-  const dodgeyScale = (d) => innerHeight - mark_size - Y[d.index];
+  const dodgeyScale = (d) => innerHeight - mark_size - padding - Y[d.index];
   const dodgexScale = (d) => xScale(X[d.index]);
 
   gx.transition(t).call(d3.axisBottom(xScale));
+
+  const smart_ease = function (d, i, n) {
+    const orig_y = this.getAttribute("y");
+    const targ_y = dodgeyScale(d);
+    if (orig_y + mark_size < targ_y) {
+      return d3.easeBounceOut;
+    } else {
+      return d3.easeExpOut;
+    }
+  };
 
   const temp_rect = g1
     .selectAll("rect")
@@ -316,7 +328,7 @@ async function DotPlot_dodge(aqdata, container) {
             .attr("ry", (d) => mark_size)
             .attr("x", (d) => dodgexScale(d))
             .transition()
-            .ease(d3.easeBounceOut)
+            .easeVarying(smart_ease)
             .attr("y", (d) => dodgeyScale(d))
         ),
       (exit) =>
@@ -348,9 +360,9 @@ async function DotPlot_dodge2(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const margin = {
-      top: 30,
-      right: 30,
-      bottom: 30,
+      top: 100,
+      right: 100,
+      bottom: 100,
       left: 30,
     },
     innerWidth = width - margin.left - margin.right,
@@ -391,21 +403,26 @@ async function DotPlot_dodge2(aqdata, container) {
     `translate(${margin.left},${innerHeight + margin.top})`
   );
 
-  const mark_size = 10;
   const padding = 0;
 
   const xValue = (d) => d.value_final;
 
   const xScale = d3
     .scaleLinear()
-    .domain(d3.extent(data, xValue))
+    .domain([
+      Math.floor(d3.min(data, xValue) * 2) / 2,
+      Math.round(d3.max(data, xValue) * 2) / 2,
+    ])
     .range([0, innerWidth]);
+
+  console.log(xScale.domain());
 
   const X = d3.map(data, xValue).map((x) => (x == null ? NaN : +x));
   const I = d3.range(X.length).filter((i) => !isNaN(X[i]));
   const Y = dodge(
     I.map((i) => xScale(X[i])),
-    mark_size + padding
+    mark_size + padding,
+    innerHeight
   );
 
   const dodgeyScale = (d) => innerHeight - mark_size - Y[d.index];
@@ -420,10 +437,10 @@ async function DotPlot_dodge2(aqdata, container) {
   const smart_ease = function (d, i, n) {
     const orig_y = this.getAttribute("y");
     const targ_y = dodgeyScale(d);
-    if (orig_y < targ_y) {
+    if (orig_y + mark_size < targ_y) {
       return d3.easeBounceOut;
     } else {
-      return d3.easeCubicOut;
+      return d3.easeExpOut;
     }
   };
 
@@ -452,7 +469,6 @@ async function DotPlot_dodge2(aqdata, container) {
         update.call((update) =>
           update
             .transition(t2)
-            .delay((d, i) => i)
             .style("fill", (d) => custom_colorScale(d))
             .attr("width", (d) => mark_size)
             .attr("height", (d) => mark_size)
@@ -461,6 +477,7 @@ async function DotPlot_dodge2(aqdata, container) {
             .attr("x", (d) => dodgexScale(d))
             .transition()
             .easeVarying(smart_ease)
+            .delay((d, i) => i)
             .attr("y", (d) => dodgeyScale(d))
         ),
       (exit) =>

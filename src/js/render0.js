@@ -1,7 +1,7 @@
 function initialRender0(canvas) {
   const margin = {
       top: 30,
-      right: 30,
+      right: 100,
       bottom: 50,
       left: 200,
     },
@@ -25,7 +25,7 @@ function initialRender0(canvas) {
 function HorizontalBarChart(data, canvas, article) {
   const margin = {
       top: 30,
-      right: 30,
+      right: 100,
       bottom: 50,
       left: 200,
     },

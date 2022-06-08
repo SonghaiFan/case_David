@@ -7,9 +7,9 @@
   --secondary: #03b976;
   --font-color: #000000;
   --bg-color: #ffffff;
-  --bg-transparent-low: rgba(255, 255, 255, 0.2);
+  --bg-transparent-low: rgba(255, 255, 255, 0.05);
   --bg-transparent-hig: rgba(255, 255, 255, 0.8);
-  --bgr-transparent-low: rgba(0, 0, 0, 0.2);
+  --bgr-transparent-low: rgba(0, 0, 0, 0.1);
   --bgr-transparent-hig: rgba(0, 0, 0, 0.8);
   --head-height: 25px;
 }
@@ -19,7 +19,7 @@
   --bg-color: #000000;
   --bg-transparent-low: rgba(0, 0, 0, 0.2);
   --bg-transparent-hig: rgba(0, 0, 0, 0.8);
-  --bgr-transparent-low: rgba(255, 255, 255, 0.2);
+  --bgr-transparent-low: rgba(255, 255, 255, 0.05);
   --bgr-transparent-hig: rgba(255, 255, 255, 0.8);
 }
 
@@ -31,7 +31,7 @@ body {
   background-color: var(--bg-color);
   text-align: center;
   scroll-behavior: smooth;
-  margin: auto;
+  margin: 0;
 }
 
 p {
@@ -59,10 +59,12 @@ svg > .layer {
   transition: ease-in-out 750ms;
   transition-delay: 750ms;
   transition-property: opacity;
+  pointer-events: none;
 }
 
 svg > .layer.is-active {
   opacity: 1;
+  pointer-events: all;
 }
 
 /* Buttons
@@ -102,30 +104,36 @@ input[type="button"].button-primary:focus {
 
 .chapter {
   min-height: 640px;
-  scroll-margin-top: 25px;
-  margin: 50px auto;
   max-width: 75ch;
+  padding: 5rem;
+  margin: auto;
 }
 
 .chapter img {
   display: block;
-  margin: 2em auto;
+  margin: 2rem auto;
 }
 
 .intro {
   max-width: none;
-  margin-top: 0;
-  margin-bottom: 100px;
+  padding-top: 0;
+  margin-bottom: 5rem;
   background-image: linear-gradient(transparent, var(--bg-color)), url();
   background-repeat: no-repeat;
   background-size: cover;
 }
 
 .intro h1 {
-  margin-top: 50px;
-  font-size: 5em;
+  font-size: 10rem;
   font-weight: 600;
   color: var(--primary);
+}
+
+.ridge {
+  max-width: none;
+  margin: 1rem auto;
+  padding: 5rem auto;
+  background-color: var(--bgr-transparent-low);
 }
 
 /* .outro {
@@ -148,12 +156,10 @@ input[type="button"].button-primary:focus {
   position: -webkit-sticky;
   position: sticky;
   width: 100%;
-  padding: 1rem;
   -webkit-transform: translate3d(0, 0, 0);
   -moz-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
   z-index: 0;
-  /* border: 1px solid; */
   border-radius: 4px;
   display: grid;
 }
@@ -161,16 +167,14 @@ input[type="button"].button-primary:focus {
 .figure p {
   position: absolute;
   text-align: right;
-  padding: 1rem;
-  top: 98%;
-  left: 99%;
-  -moz-transform: translate(-50%, -50%);
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
+  top: 95%;
+  left: 98%;
   font-size: 1rem;
 }
 
 .figure svg {
+  /* box-sizing: border-box;
+  border: 1px solid; */
   position: absolute;
   width: 100%;
   height: 100%;

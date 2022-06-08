@@ -4,7 +4,7 @@ function HorizontalBarchart() {
       top: 100,
       right: 100,
       bottom: 100,
-      left: 100,
+      left: 30,
     },
     dim_x,
     dim_color,

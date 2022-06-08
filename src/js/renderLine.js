@@ -20,6 +20,8 @@ const colorScale = d3
 
 const colorValue = (d) => d.year;
 
+const mark_size = 10;
+
 const selected_date_string = localStorage.getItem("selected_date_string");
 const selected_date = new Date(selected_date_string);
 const selected_year = selected_date.getFullYear();
@@ -40,7 +42,7 @@ async function LineChart(aqdata, container) {
 
   const margin = {
       top: 200,
-      right: 30,
+      right: 100,
       bottom: 200,
       left: 30,
     },
@@ -116,8 +118,9 @@ async function LineChart(aqdata, container) {
 
   const xScale = d3
     .scaleLinear()
-    .domain(d3.extent(data, x1Value))
-    .range([0, innerWidth]);
+    .domain([d3.min(data, x1Value), d3.max(data, x1Value)])
+    .range([0, innerWidth])
+    .nice();
 
   gx.transition(t)
     .call(d3.axisBottom(xScale))
@@ -158,7 +161,7 @@ async function LineChart(aqdata, container) {
               .duration((d) => d.value_final_diff)
               .delay((d) => d.value_final_diff_rolsum + (d.year - 1910) * 10)
               .style("opacity", 1)
-              .style("stroke-width", "2px")
+              .style("stroke-width", null)
               .attr("x2", (d) => xScale(x2Value(d)))
               .attr("y2", (d) => yScale(y2Value(d)))
           ),
@@ -168,7 +171,7 @@ async function LineChart(aqdata, container) {
             .transition(t)
             .style("opacity", 1)
             .style("stroke", (d) => custom_colorScale(d))
-            .style("stroke-width", "2px")
+            .style("stroke-width", null)
             .attr("x1", (d) => xScale(x1Value(d)))
             .attr("y1", (d) => yScale(y1Value(d)))
             .attr("x2", (d) => xScale(x2Value(d)))
@@ -185,7 +188,7 @@ async function LineChart_Dot(aqdata, container) {
 
   const margin = {
       top: 200,
-      right: 30,
+      right: 100,
       bottom: 200,
       left: 30,
     },
@@ -280,8 +283,6 @@ async function LineChart_Dot(aqdata, container) {
     .selectAll("line")
     .data(data, (d) => `${d.year}_${d.day_of_year}`);
 
-  const size = 5;
-
   temp_lines
     .join(
       (enter) =>
@@ -301,7 +302,7 @@ async function LineChart_Dot(aqdata, container) {
               .duration((d) => d.value_final_diff)
               .delay((d) => d.value_final_diff_rolsum + (d.year - 1910) * 10)
               .style("opacity", 1)
-              .style("stroke-width", "10px")
+              .style("stroke-width", mark_size + "px")
           ),
       (update) =>
         update.call((update) =>
@@ -309,7 +310,7 @@ async function LineChart_Dot(aqdata, container) {
             .transition(t)
             .style("opacity", 1)
             .style("stroke", (d) => custom_colorScale(d))
-            .style("stroke-width", "10px")
+            .style("stroke-width", mark_size + "px")
             .attr("x1", (d) => xScale(x1Value(d)))
             .attr("y1", (d) => yScale(y1Value(d)))
             .attr("x2", (d) => xScale(x1Value(d)))

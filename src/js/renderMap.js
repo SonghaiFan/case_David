@@ -2,9 +2,9 @@ async function BubbleMap(data, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const margin = {
-      top: 30,
-      right: 30,
-      bottom: 30,
+      top: 100,
+      right: 100,
+      bottom: 100,
       left: 30,
     },
     innerWidth = width - margin.left - margin.right,
@@ -20,13 +20,13 @@ async function BubbleMap(data, container) {
 
   const usedLayters = ["figureLayer", "figureLayer1"];
 
-  const layers = svg
+  svg
     .selectAll("g")
     .data(usedLayters, (d) => d)
     .join(
       (enter) => enter,
       (update) => update.classed("is-active", true),
-      (exit) => exit.classed("is-active", false)
+      (exit) => exit.classed("is-active", false).selectAll("*").remove()
     );
 
   const stationsIp = d3.select("#stationInput");

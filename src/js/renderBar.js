@@ -33,9 +33,9 @@ async function Histgram(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const margin = {
-      top: 30,
-      right: 30,
-      bottom: 30,
+      top: 100,
+      right: 100,
+      bottom: 100,
       left: 30,
     },
     innerWidth = width - margin.left - margin.right,
@@ -49,8 +49,6 @@ async function Histgram(aqdata, container) {
     .derive({ hist_y0: (d) => op.lag(d.hist_y1, 1, 0) })
     .orderby("bin")
     .objects();
-
-  console.log(data);
 
   const svg = container.select("svg");
 
@@ -94,9 +92,20 @@ async function Histgram(aqdata, container) {
 
   const xScale = d3
     .scaleBand()
-    .domain(d3.range(d3.min(data, xValue), d3.max(data, xValue), 0.5))
+    .domain(
+      d3.range(
+        Math.floor(d3.min(data, xValue) * 2) / 2,
+        d3.max(data, xValue) + 0.6,
+        0.5
+      )
+    )
     .range([0, innerWidth])
-    .padding(padding);
+    .paddingInner(0)
+    .paddingOuter(-0.5)
+    .round(false);
+
+  console.log(xScale.domain());
+  console.log(d3.max(data, xValue));
 
   gx.transition(t).call(d3.axisBottom(xScale));
 
@@ -121,7 +130,7 @@ async function Histgram(aqdata, container) {
           .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
           .attr("width", xScale.bandwidth())
           .attr("height", 0)
-          .attr("x", (d) => xScale(xValue(d)))
+          .attr("x", (d) => xScale(xValue(d)) + xScale.bandwidth() / 2)
           .attr("y", innerHeight)
           .call((enter) =>
             enter
@@ -141,7 +150,7 @@ async function Histgram(aqdata, container) {
             .attr("width", xScale.bandwidth())
             .attr("rx", 0)
             .attr("ry", 0)
-            .attr("x", (d) => xScale(xValue(d)))
+            .attr("x", (d) => xScale(xValue(d)) + xScale.bandwidth() / 2)
             .transition(t)
             .attr("height", (d) => innerHeight - yScale(d.hist_y1 - d.hist_y0))
             .attr("y", (d) => yScale(yValue(d)))
@@ -170,9 +179,9 @@ async function Histgram2(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const margin = {
-      top: 30,
-      right: 30,
-      bottom: 30,
+      top: 100,
+      right: 100,
+      bottom: 100,
       left: 30,
     },
     innerWidth = width - margin.left - margin.right,

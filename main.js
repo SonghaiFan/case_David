@@ -57,7 +57,7 @@ const dayOfYear = (date) =>
     (date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)
   );
 
-const selected_date_string = "1994-7-21";
+const selected_date_string = "2013-3-21";
 localStorage.setItem("selected_date_string", selected_date_string);
 
 const selected_date = new Date(selected_date_string);
@@ -197,12 +197,12 @@ function handleResize() {
   // 1. update height of step elements
   const stepH = Math.floor(window.innerHeight * 0.95);
   steps
-    // .style("margin-top", stepH / 2 + "px")
-    .style("margin-bottom", stepH + "px");
+    .style("margin-top", stepH / 2 + "px")
+    .style("margin-bottom", stepH / 2 + "px");
   chapters.style("min-height", stepH + "px");
 
   const figureHeight = window.innerHeight * 0.9;
-  const figureMarginTop = (window.innerHeight - figureHeight) / 4;
+  const figureMarginTop = (window.innerHeight - figureHeight) / 2;
 
   figures
     .style("height", figureHeight + "px")
