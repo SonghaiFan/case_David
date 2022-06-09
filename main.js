@@ -1,4 +1,3 @@
-import UnitChart from "./src/js/UnitChart.js";
 import { BubbleMap } from "./src/js/renderMap.js";
 import { LineChart, LineChart_Dot } from "./src/js/renderLine.js";
 import { DotPlot, DotPlot_dodge, DotPlot_dodge2 } from "./src/js/renderDot.js";
@@ -57,7 +56,7 @@ const dayOfYear = (date) =>
     (date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)
   );
 
-const selected_date_string = "2020-3-21";
+const selected_date_string = "2020-7-9";
 localStorage.setItem("selected_date_string", selected_date_string);
 
 const selected_date = new Date(selected_date_string);
@@ -177,11 +176,28 @@ function stepTrigger(index) {
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
         fig1
       );
+      // Histgram2(
+      //   tdataPOI
+      //     .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+      //     .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
+      //   fig1
+      // );
       break;
     case 12:
-      Histgram2(tdataPOI.filter(aq.escape((d) => d.year == 1910)), fig1);
+      Histgram2(
+        tdataPOI
+          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
+        fig1
+      );
       break;
     case 13:
+      Histgram2(tdataPOI, fig1);
+      break;
+    case 14:
+      Histgram2(tdataPOI.filter(aq.escape((d) => d.year == 1910)), fig1);
+      break;
+    case 15:
       Histgram2(
         tdataPOI.filter(
           aq.escape((d) => d.year == selected_date.getFullYear())
@@ -289,6 +305,7 @@ function init() {
 
   // 4. render the first map
   BubbleMap(sdata, fig_map);
+  localStorage.setItem("selected_date_string", selected_date_string);
 }
 
 // kick things off
