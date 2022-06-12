@@ -1,6 +1,6 @@
 .intro {
   background-image: linear-gradient(transparent, var(--bg-color)),
-    url(https://ichef.bbci.co.uk/news/976/cpsprodpb/1352B/production/_110574197_hi059274286.jpg);
+    url(/src/images/colorful-background-texture-multi-color-orange-illustration-3840x2715-3104.jpg);
   background-repeat: no-repeat;
   background-size: cover;
 }
