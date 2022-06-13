@@ -411,7 +411,7 @@ async function DotPlot_dodge2(aqdata, container) {
     .scaleLinear()
     .domain([
       Math.floor(d3.min(data, xValue) * 2) / 2,
-      Math.round(d3.max(data, xValue) * 2) / 2,
+      Math.round(d3.max(data, xValue) * 2) / 2 + 0.5,
     ])
     .range([0, innerWidth]);
 

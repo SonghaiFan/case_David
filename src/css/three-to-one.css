@@ -246,20 +246,19 @@ input[type="button"].button-primary:focus {
 /* NavigationBar
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 
-#navbar {
+.floatbar {
   background-color: var(--bg-transparent-low);
   backdrop-filter: blur(2px);
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  position: fixed;
-  bottom: 0;
+  z-index: 100;
   width: 100%;
 }
 
 /* Style the links inside the navigation bar */
-#navbar a {
+.floatbar a {
   float: left;
   display: block;
   text-align: center;
@@ -268,17 +267,27 @@ input[type="button"].button-primary:focus {
 }
 
 /* Change the color of links on hover */
-#navbar a:hover {
+.floatbar a:hover {
   opacity: 1;
 }
 
-#navbar a.is-active {
+.floatbar a.active {
   opacity: 1;
   transition: ease, 1s;
 }
 
 #dynamic_nav_container {
   font-size: 0.8em;
+}
+
+.sticky-top {
+  position: fixed;
+  top: 0;
+}
+
+.sticky-bottom {
+  position: fixed;
+  bottom: 0;
 }
 
 /* Scroll indicator

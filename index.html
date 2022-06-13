@@ -73,7 +73,29 @@
         </div>
       </div>
     </div>
-
+    <div class="floatbar" id="interestbar">
+      <div id="station-input-wrapper">
+        <label for="stationinput">Selected station:</label>
+        <select id="stationInput"></select>
+      </div>
+      <div id="date-input-wrapper">
+        <label for="dateinput">Selected date:</label>
+        <input type="date" id="dateinput" name="idate" />
+      </div>
+      <div id="type-input-wrapper">
+        <label for="dateinput">Selected type:</label>
+        <input
+          type="radio"
+          id="type-tmax"
+          name="itype"
+          value="tmax"
+          checked="checked"
+        />
+        <label for="type-tmax">tmax</label>
+        <input type="radio" id="type-tmin" name="itype" value="tmin" />
+        <label for="type-tmin">tmin</label>
+      </div>
+    </div>
     <div class="chapter ridge">
       <h1>Choose the station near you.</h1>
       <p>
@@ -83,10 +105,7 @@
         ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa
         quis enim.
       </p>
-      <div id="station-input-wrapper">
-        <label for="stationinput">Selected station:</label>
-        <select id="stationInput"></select>
-      </div>
+
       <div class="figure" id="fig_map">
         <div class="tooltip" id="tooltipContainer_map"></div>
         <p>0</p>
@@ -453,7 +472,7 @@
       </form>
     </div>
 
-    <div id="navbar">
+    <div class="floatbar sticky-bottom" id="navbar">
       <a href="#" id="previous">&laquo; Previous</a>
       <div id="dynamic_nav_container"></div>
       <a href="#" id="next">Next &raquo;</a>

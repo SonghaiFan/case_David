@@ -95,7 +95,7 @@ async function Histgram(aqdata, container) {
     .domain(
       d3.range(
         Math.floor(d3.min(data, xValue) * 2) / 2,
-        d3.max(data, xValue) + 0.6,
+        Math.round(d3.max(data, xValue) * 2) / 2 + 0.6,
         0.5
       )
     )
@@ -103,6 +103,7 @@ async function Histgram(aqdata, container) {
     .paddingInner(0)
     .paddingOuter(-0.5)
     .round(false);
+  console.log(xScale.domain());
 
   gx.transition(t)
     .call(d3.axisBottom(xScale))
@@ -200,7 +201,7 @@ async function Histgram2(aqdata, container) {
   const t2 = t.transition().duration(smart_duration);
   const t3 = t.transition().duration(smart_duration);
 
-  const usedLayters = ["figureLayer3", "xAxisLayer", "yAxisLayer"];
+  const usedLayters = ["figureLayer1", "xAxisLayer", "yAxisLayer"];
 
   const layers = svg
     .selectAll("g")
@@ -211,7 +212,7 @@ async function Histgram2(aqdata, container) {
       (exit) => exit.classed("is-active", false)
     );
 
-  const g3 = svg.select(".figureLayer3"),
+  const g3 = svg.select(".figureLayer1"),
     gx = svg.select(".xAxisLayer"),
     gy = svg.select(".yAxisLayer");
 
@@ -235,7 +236,7 @@ async function Histgram2(aqdata, container) {
     .domain(
       d3.range(
         Math.floor(d3.min(data, xValue) * 2) / 2,
-        d3.max(data, xValue) + 0.6,
+        Math.round(d3.max(data, xValue) * 2) / 2 + 0.6,
         0.5
       )
     )
@@ -243,6 +244,7 @@ async function Histgram2(aqdata, container) {
     .paddingInner(0)
     .paddingOuter(-0.5)
     .round(false);
+  console.log(xScale.domain());
 
   const line = d3
     .line()

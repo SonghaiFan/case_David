@@ -176,12 +176,6 @@ function stepTrigger(index) {
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
         fig1
       );
-      // Histgram2(
-      //   tdataPOI
-      //     .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-      //     .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
-      //   fig1
-      // );
       break;
     case 12:
       Histgram2(
@@ -231,8 +225,8 @@ function handleResize() {
 // scrollama event handlers
 function handleStepEnter({ element, direction, index }) {
   // add color to current step only
-  steps.classed("is-active", false);
-  d3.select(element).classed("is-active", true);
+  steps.classed("active", false);
+  d3.select(element).classed("active", true);
 
   // update graphic based on step
   figures.select("p").text(index);
@@ -240,10 +234,8 @@ function handleStepEnter({ element, direction, index }) {
   navbar.select("#next").attr("href", `#scrollama_step_${index + 1}`);
   navbar.select("#previous").attr("href", `#scrollama_step_${index - 1}`);
 
-  d3.select("#dynamic_nav_container")
-    .selectAll("a")
-    .classed("is-active", false);
-  d3.select(`#scrollama_step_tag_${index}`).classed("is-active", true);
+  d3.select("#dynamic_nav_container").selectAll("a").classed("active", false);
+  d3.select(`#scrollama_step_tag_${index}`).classed("active", true);
 
   stepTrigger(index);
 }
@@ -306,6 +298,22 @@ function init() {
   // 4. render the first map
   BubbleMap(sdata, fig_map);
   localStorage.setItem("selected_date_string", selected_date_string);
+}
+
+window.onscroll = function () {
+  myFunction();
+  console.log(sticky);
+};
+
+var interestbar = document.getElementById("interestbar");
+var sticky = interestbar.offsetTop;
+
+function myFunction() {
+  if (window.pageYOffset >= sticky) {
+    interestbar.classList.add("sticky-top");
+  } else {
+    interestbar.classList.remove("sticky-top");
+  }
 }
 
 // kick things off

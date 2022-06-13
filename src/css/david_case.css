@@ -29,6 +29,23 @@
 
 #station-input-wrapper {
   float: right;
+  display: flex;
+  align-items: center;
+  margin-right: 50px;
+  margin: 0;
+}
+
+#date-input-wrapper {
+  float: right;
+  display: flex;
+  align-items: center;
+  margin-right: 50px;
+}
+
+#type-input-wrapper {
+  float: right;
+  display: flex;
+  align-items: center;
   margin-right: 50px;
 }
 
@@ -49,5 +66,3 @@
   stroke-width: 2px;
   transition: ease, 1s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
-
-.
