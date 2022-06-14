@@ -56,11 +56,13 @@ const dayOfYear = (date) =>
     (date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)
   );
 
-const selected_date_string = "2020-7-9";
+const selected_date_string = "2022-2-14";
 localStorage.setItem("selected_date_string", selected_date_string);
 
 const selected_date = new Date(selected_date_string);
 const selected_type = "tmax";
+
+document.getElementById("dateinput").valueAsDate = selected_date;
 
 const selected_dayOfYear = dayOfYear(selected_date);
 
@@ -132,14 +134,14 @@ function stepTrigger(index) {
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.temp_percentile >= 95)),
+          .filter(aq.escape((d) => d.temp_percentile >= 50)),
         fig1
       );
       DotPlot(
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.temp_percentile >= 95)),
+          .filter(aq.escape((d) => d.temp_percentile >= 50)),
         fig1
       );
       break;
@@ -148,7 +150,7 @@ function stepTrigger(index) {
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.temp_percentile >= 95)),
+          .filter(aq.escape((d) => d.temp_percentile >= 50)),
         fig1
       );
       break;
@@ -157,7 +159,7 @@ function stepTrigger(index) {
         tdataPOI
           .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
           .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.temp_percentile >= 95)),
+          .filter(aq.escape((d) => d.temp_percentile >= 50)),
         fig1
       );
       break;
