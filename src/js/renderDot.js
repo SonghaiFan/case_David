@@ -1,37 +1,10 @@
-const primary_color = getComputedStyle(
-  document.documentElement
-).getPropertyValue("--primary");
-
 const tooltip = d3.select("#tooltipContainer1");
 
-const colorScale = d3
-  .scaleSequentialPow()
-  .exponent(8)
-  .domain([1910, 2022])
-  .interpolator(
-    d3.interpolateRgb("hsla(120, 0%, 83%, 0.5)", "hsla(0, 0%, 33%, 1.00)")
-  );
 const dateFormat = d3.timeFormat("%e %B %Y");
-const colorValue = (d) => d.year;
 
 let mark_size = 10;
 
-const selected_date_string = localStorage.getItem("selected_date_string");
-const selected_date = new Date(selected_date_string);
-const selected_year = selected_date.getFullYear();
-const selected_decade = Math.round(selected_year / 10) * 10;
-
-const custom_colorScale = function (d) {
-  if (d.year == selected_year) {
-    return primary_color;
-  } else if (d.decade == selected_decade) {
-    return "#ffaa92";
-  } else {
-    return colorScale(colorValue(d));
-  }
-};
-
-function dodge(X, radius, height) {
+function dodge(X, radius) {
   const Y = new Float64Array(X.length);
   const radius2 = radius ** 2;
   const epsilon = 1e-3;
@@ -72,39 +45,35 @@ function dodge(X, radius, height) {
     else tail = tail.next = b;
   }
 
-  if (height < d3.max(Y)) {
-    return height * 2 < d3.max(Y)
-      ? dodge(X, radius - 3, height)
-      : dodge(X, radius - 1, height);
-  } else {
-    return Y;
-  }
+  // if (height < d3.max(Y)) {
+  //   return height * 2 < d3.max(Y)
+  //     ? dodge(X, radius - 3, height)
+  //     : dodge(X, radius - 1, height);
+  // } else {
+  //   return Y;
+  // }
+  return Y;
 }
 
-async function DotPlot(aqdata, container) {
+async function DotPlot(aqdata, container, { tickFormater }) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const margin = {
-      top: 200,
+      top: 100,
       right: 100,
-      bottom: 200,
+      bottom: 100,
       left: 30,
     },
     innerWidth = width - margin.left - margin.right,
     innerHeight = height - margin.top - margin.bottom;
 
-  const data = aqdata
-    // .select("date", "year", "decade", "day_of_year", "value_final")
-    .orderby(aq.desc("date"))
-    .objects();
+  const data = aqdata.orderby(aq.desc("date")).objects();
 
   const svg = container.select("svg");
 
-  const smart_duration = data.length < 100 ? 1500 : 750;
-
-  const t = svg.transition().duration(smart_duration);
-  const t2 = t.transition().duration(smart_duration);
-  const t3 = t.transition().duration(smart_duration);
+  const t = svg.transition().duration(750);
+  const t2 = t.transition().duration(750);
+  const t3 = t.transition().duration(750);
 
   const usedLayters = ["figureLayer1", "xAxisLayer", "yAxisLayer"];
 
@@ -126,22 +95,22 @@ async function DotPlot(aqdata, container) {
     "transform",
     `translate(${margin.left},${innerHeight + margin.top})`
   );
-  gy.transition(t).attr("transform", `translate(${margin.left},${margin.top})`);
+  gy.transition(t).attr(
+    "transform",
+    `translate(${margin.left - mark_size},${margin.top})`
+  );
 
   const xValue = (d) => d.day_of_year;
   const yValue = (d) => d.value_final;
 
-  const yScale = d3
-    .scaleLinear()
-    .domain([0, d3.max(data, yValue)])
-    .range([innerHeight, 0]);
+  const yScale = d3.scaleLinear().domain([-10, 50]).range([innerHeight, 0]);
 
   const xScale = d3
     .scaleLinear()
     .domain(d3.extent(data, xValue))
     .range([0, innerWidth]);
 
-  gx.transition(t).call(d3.axisBottom(xScale));
+  gx.transition(t).call(d3.axisBottom(xScale).tickFormat(tickFormater));
 
   gy.transition(t).call(
     d3
@@ -160,7 +129,8 @@ async function DotPlot(aqdata, container) {
         enter
           .append("rect")
           .attr("class", "temp_rect")
-          .style("fill", (d) => custom_colorScale(d))
+          .style("opacity", 0)
+          .style("fill", (d) => d.color)
           .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
           .attr("rx", (d) => mark_size)
           .attr("ry", (d) => mark_size)
@@ -168,33 +138,22 @@ async function DotPlot(aqdata, container) {
           .attr("height", (d) => mark_size)
           .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
           .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
-          .call((enter) =>
-            enter
-              .transition(t)
-              .attr("rx", (d) => mark_size)
-              .attr("ry", (d) => mark_size)
-              .attr("width", (d) => mark_size)
-              .attr("height", (d) => mark_size)
-              .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
-              .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
-          ),
+          .call((enter) => enter.transition(t3).style("opacity", 1)),
       (update) =>
         update.call((update) =>
           update
-            .transition(t)
-            .style("fill", (d) => custom_colorScale(d))
+            .transition(t2)
+            .style("opacity", 1)
+            .style("fill", (d) => d.color)
             .attr("width", (d) => mark_size)
             .attr("height", (d) => mark_size)
             .attr("rx", (d) => mark_size)
             .attr("ry", (d) => mark_size)
             .attr("x", (d) => xScale(xValue(d)) - mark_size / 2)
-            .transition(t)
             .attr("y", (d) => yScale(yValue(d)) - mark_size / 2)
         ),
       (exit) =>
-        exit.call((exit) =>
-          exit.transition(t).attr("width", 0).attr("height", 0)
-        )
+        exit.call((exit) => exit.transition(t).style("opacity", 0).remove())
     )
     .on("mouseover", (e, d) => {
       tooltip
@@ -215,16 +174,15 @@ async function DotPlot_dodge(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const margin = {
-      top: 30,
+      top: 100,
       right: 100,
-      bottom: 200,
+      bottom: 100,
       left: 30,
     },
     innerWidth = width - margin.left - margin.right,
     innerHeight = height - margin.top - margin.bottom;
 
   const data = aqdata
-    // .select("date", "year", "decade", "day_of_year", "value_final")
     .orderby(aq.desc("date"))
     .derive({ index: (d) => op.row_number() - 1 })
     .objects();
@@ -301,7 +259,7 @@ async function DotPlot_dodge(aqdata, container) {
         enter
           .append("rect")
           .attr("class", "temp_rect")
-          .style("fill", (d) => custom_colorScale(d))
+          .style("fill", (d) => d.color)
           .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
           .attr("rx", (d) => mark_size)
           .attr("ry", (d) => mark_size)
@@ -314,14 +272,16 @@ async function DotPlot_dodge(aqdata, container) {
               .transition(t3)
               .delay((d, i) => i)
               .ease(d3.easeBounceOut)
+              .style("opacity", 1)
               .attr("y", (d) => dodgeyScale(d))
           ),
       (update) =>
         update.call((update) =>
           update
             .transition(t)
+            .style("opacity", 1)
             .delay((d, i) => i)
-            .style("fill", (d) => custom_colorScale(d))
+            .style("fill", (d) => d.color)
             .attr("width", (d) => mark_size)
             .attr("height", (d) => mark_size)
             .attr("rx", (d) => mark_size)
@@ -338,6 +298,7 @@ async function DotPlot_dodge(aqdata, container) {
             .ease(d3.easeCubicOut)
             .delay((d, i) => i)
             .attr("y", innerHeight * 2)
+            .style("opacity", 0)
             .remove()
         )
     )
@@ -360,7 +321,7 @@ async function DotPlot_dodge2(aqdata, container) {
   const { width, height } = container.node().getBoundingClientRect();
 
   const margin = {
-      top: 30,
+      top: 100,
       right: 100,
       bottom: 100,
       left: 30,
@@ -370,7 +331,6 @@ async function DotPlot_dodge2(aqdata, container) {
 
   const data = aqdata
     // .select("date", "year", "decade", "day_of_year", "value_final")
-    .orderby(aq.desc("date"))
     .derive({ index: (d) => op.row_number() - 1 })
     .objects();
 
@@ -450,7 +410,7 @@ async function DotPlot_dodge2(aqdata, container) {
         enter
           .append("rect")
           .attr("class", "temp_rect")
-          .style("fill", (d) => custom_colorScale(d))
+          .style("fill", (d) => d.color)
           .attr("id", (d) => `temp_rect_${d.year}_${d.day_of_year}`)
           .attr("rx", (d) => mark_size)
           .attr("ry", (d) => mark_size)
@@ -469,7 +429,7 @@ async function DotPlot_dodge2(aqdata, container) {
         update.call((update) =>
           update
             .transition(t2)
-            .style("fill", (d) => custom_colorScale(d))
+            .style("fill", (d) => d.color)
             .attr("width", (d) => mark_size)
             .attr("height", (d) => mark_size)
             .attr("rx", (d) => mark_size)

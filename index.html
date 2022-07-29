@@ -22,10 +22,10 @@
 
     <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-    <link rel="stylesheet" href="css/normalize.css" />
+    <link rel="stylesheet" href="src/css/normalize.css" />
     <link rel="stylesheet" href="src/css/skeleton.css" />
     <link rel="stylesheet" href="src/css/three-to-one.css" />
-    <link rel="stylesheet" href="src/css/david_case.css" />
+    <link rel="stylesheet" href="src/css/special_case.css" />
 
     <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -39,12 +39,6 @@
     <div class="chapter intro">
       <div id="headline">
         Three-to-one scrollytelling data visualization case study
-      </div>
-      <div class="theme-switch-wrapper">
-        <label class="theme-switch" for="checkbox">
-          <input type="checkbox" id="checkbox" />
-          <div class="slider round"></div>
-        </label>
       </div>
       <br />
       <h1>
@@ -73,29 +67,46 @@
         </div>
       </div>
     </div>
+
     <div class="floatbar" id="interestbar">
-      <div id="station-input-wrapper">
-        <label for="stationinput">Selected station:</label>
-        <select id="stationInput"></select>
+      <div id="station-input-wrapper" class="input-wrapper">
+        <label for="istation">Selected station:</label>
+        <select id="stationInput" name="istation"></select>
       </div>
-      <div id="date-input-wrapper">
-        <label for="dateinput">Selected date:</label>
-        <input type="date" id="dateinput" name="idate" />
-      </div>
-      <div id="type-input-wrapper">
-        <label for="dateinput">Selected type:</label>
+      <div id="date-input-wrapper" class="input-wrapper">
+        <label for="idate">Selected date:</label>
         <input
-          type="radio"
-          id="type-tmax"
-          name="itype"
-          value="tmax"
-          checked="checked"
+          type="date"
+          id="dateInput"
+          name="idate"
+          min="1910-01-01"
+          max="2022-04-14"
+          value="2022-02-14"
         />
-        <label for="type-tmax">tmax</label>
-        <input type="radio" id="type-tmin" name="itype" value="tmin" />
-        <label for="type-tmin">tmin</label>
+      </div>
+      <div id="type-input-wrapper" class="input-wrapper">
+        <label for="itype">Selected type:</label>
+        <select id="typeInput" name="itype">
+          <option value="tmax" selected="selected">
+            Maximum daily temparature
+          </option>
+          <option value="tmin">Minimum daily temparature</option>
+        </select>
+      </div>
+      <div id="threshold-input-wrapper" class="input-wrapper">
+        <label for="ithresh">Extreame threshold:</label>
+        <input
+          type="range"
+          id="threshInput"
+          name="ithresh"
+          min="0"
+          max="100"
+          step="5"
+          value="95"
+        />
       </div>
     </div>
+
     <div class="chapter ridge">
       <h1>Choose the station near you.</h1>
       <p>
@@ -190,16 +201,14 @@
         </div>
         <div class="step">
           <p>
-            <strong> Plot them by the amount of temparature. </strong>
+            <strong> Plot them by temparature. </strong>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloremque
             ex vel, eius alias dolor blanditiis
           </p>
         </div>
         <div class="step">
           <p>
-            <strong>
-              Include not only the extreame weather within same hitory period.
-            </strong>
+            <strong> Show the all the dialy temparature. </strong>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloremque
             ex vel, eius alias dolor blanditiis
           </p>
@@ -213,24 +222,28 @@
         </div>
         <div class="step">
           <p>
+            <strong> histogram. </strong>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloremque
             ex vel, eius alias dolor blanditiis
           </p>
         </div>
         <div class="step">
           <p>
+            <strong> histogram. </strong>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloremque
             ex vel, eius alias dolor blanditiis
           </p>
         </div>
         <div class="step">
           <p>
+            <strong> histogram. </strong>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloremque
             ex vel, eius alias dolor blanditiis
           </p>
         </div>
         <div class="step">
           <p>
+            <strong> histogram. </strong>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloremque
             ex vel, eius alias dolor blanditiis
           </p>
@@ -452,42 +465,6 @@
       </div>
     </div> -->
 
-    <div class="chapter">
-      <p><br /><a href="#top">Jump to top of page</a><br />🚀</p>
-      <form>
-        <div class="row">
-          <div class="six columns">
-            <label for="exampleEmailInput">Your email</label>
-            <input
-              class="u-full-width"
-              type="email"
-              placeholder="test@mailbox.com"
-              id="exampleEmailInput"
-            />
-          </div>
-          <div class="six columns">
-            <label for="exampleRecipientInput">Reason for contacting</label>
-            <select class="u-full-width" id="exampleRecipientInput">
-              <option value="Option 1">Questions</option>
-              <option value="Option 2">Admiration</option>
-              <option value="Option 3">Can I get your number?</option>
-            </select>
-          </div>
-        </div>
-        <label for="exampleMessage">Message</label>
-        <textarea
-          class="u-full-width"
-          placeholder="Hi Dave …"
-          id="exampleMessage"
-        ></textarea>
-        <label class="example-send-yourself-copy">
-          <input type="checkbox" />
-          <span class="label-body">Send a copy to yourself</span>
-        </label>
-        <input class="button-primary" type="submit" value="Submit" />
-      </form>
-    </div>
-
     <div class="floatbar sticky-bottom" id="navbar">
       <a href="#" id="previous">&laquo; Previous</a>
       <div id="dynamic_nav_container"></div>
@@ -503,6 +480,7 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/topojson@3"></script>
     <script src="https://unpkg.com/d3-interpolate-path/build/d3-interpolate-path.min.js"></script>
+    <script src="https://unpkg.com/flubber@0.3.0"></script>
 
     <script src="https://unpkg.com/intersection-observer"></script>
     <script src="https://unpkg.com/scrollama"></script>

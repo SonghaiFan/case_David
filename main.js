@@ -1,205 +1,180 @@
+// Import the rendder fucntion
+
 import { BubbleMap } from "./src/js/renderMap.js";
-import { LineChart, LineChart_Dot } from "./src/js/renderLine.js";
+import { LineChart } from "./src/js/renderLine.js";
 import { DotPlot, DotPlot_dodge, DotPlot_dodge2 } from "./src/js/renderDot.js";
 import { Histgram, Histgram2 } from "./src/js/renderBar.js";
 
+// Declare the main manipulated DOMs as D3 selection objects
+
 const figures = d3.selectAll(".figure");
-const article = d3.selectAll(".article");
-const fig_map = d3.select("#fig_map");
 const fig1 = d3.select("#fig1");
-const fig2 = d3.select("#fig2");
-const fig3 = d3.select("#fig3");
-const steps = d3.selectAll(".step");
+const fig_map = d3.select("#fig_map");
+
+const article = d3.selectAll(".article");
 const chapters = d3.selectAll(".chapter");
+const steps = d3.selectAll(".step");
+
 const navbar = d3.select("#navbar");
+
 const stationsIp = d3.select("#stationInput");
+const dateIp = d3.select("#dateInput");
+const typeIp = d3.select("#typeInput");
 
-const toggleSwitch = document.querySelector(
-  '.theme-switch input[type="checkbox"]'
-);
-const currentTheme = localStorage.getItem("theme")
-  ? localStorage.getItem("theme")
-  : null;
-if (currentTheme) {
-  document.documentElement.setAttribute("data-theme", currentTheme);
-
-  if (currentTheme === "dark") {
-    toggleSwitch.checked = true;
-  }
-}
-
-function switchTheme(e) {
-  if (e.target.checked) {
-    document.documentElement.setAttribute("data-theme", "dark");
-    localStorage.setItem("theme", "dark"); //add this
-  } else {
-    document.documentElement.setAttribute("data-theme", "light");
-    localStorage.setItem("theme", "light"); //add this
-  }
-}
-// initialize the scrollama
-const scroller = scrollama();
-
-// load the data
+// Load the data
 
 const sdataPath = "src/data/stations.csv";
 const tdataPath = "src/data/rich_mel_data.csv";
 
 const aq_sdata = await aq.loadCSV(sdataPath);
-const aq_tdata = await aq.loadCSV(tdataPath);
+let aq_tdata = await aq.loadCSV(tdataPath);
+aq_tdata = aq_tdata.impute({ value_final: () => 0 });
 
 const sdata = aq_sdata.objects();
 const tdata = aq_tdata.objects();
 
-const dayOfYear = (date) =>
-  Math.floor(
+function dayOfYear(date) {
+  return Math.floor(
     (date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)
   );
+}
 
-const selected_date_string = "2022-2-14";
-localStorage.setItem("selected_date_string", selected_date_string);
+$("#stationInput").change(renderPlot);
+$("#dateInput").change(renderPlot);
+$("#typeInput").change(renderPlot);
+$("#threshInput").change(renderPlot);
 
-const selected_date = new Date(selected_date_string);
-const selected_type = "tmax";
+// initialize the scrollama
+const scroller = scrollama();
 
-document.getElementById("dateinput").valueAsDate = selected_date;
+function renderPlot() {
+  const selected_station = $("#stationInput").val();
+  const selected_date_string = $("#dateInput").val();
+  const selected_type = $("#typeInput").val();
+  const selected_threshold = +$("#threshInput").val();
 
-const selected_dayOfYear = dayOfYear(selected_date);
+  const POI = {
+    selected_station: selected_station,
+    selected_date_string: selected_date_string,
+    selected_type: selected_type,
+    selected_threshold: selected_threshold,
+  };
 
-const tdataPOI = aq_tdata.filter(aq.escape((d) => d.type == selected_type));
-
-const dataTable = d3
-  .select("#tab1")
-  .html(aq_sdata.slice(1, 10).toHTML())
-  .select("table")
-  .attr("class", "u-full-width");
+  scroller.onStepEnter((response) => handleStepEnter(response, POI));
+  scroller.resize();
+}
 
 // preparation for rendering
 
-function stepTrigger(index) {
+function stepRenderTrigger(index, POI) {
+  const selected_date = new Date(POI.selected_date_string);
+  const selected_dayOfYear = dayOfYear(selected_date);
+  const selected_month = selected_date.getMonth();
+  const selected_year = selected_date.getFullYear();
+
+  const grayColorScale = d3
+    .scaleSequentialPow()
+    .exponent(8)
+    .domain([1910, 2022])
+    .interpolator(
+      d3.interpolateRgb("hsla(120, 0%, 83%, 0.5)", "hsla(0, 0%, 33%, 1.00)")
+    );
+
+  function customColorScale(d) {
+    if (d.year == selected_year) {
+      if (d.type == "tmax") {
+        return "rgb(250, 77, 29)";
+      }
+      if (d.type == "tmin") {
+        return "rgb(28, 106, 228)";
+      }
+    } else {
+      return grayColorScale(d.year);
+    }
+  }
+
+  const tdataPOI = aq_tdata
+    .filter(aq.escape((d) => d.type == POI.selected_type))
+    .derive({
+      color: aq.escape((d) => customColorScale(d)),
+    });
+
+  const tdataPOIYear = tdataPOI.filter(
+    aq.escape((d) => d.year == selected_year)
+  );
+  const tdataPOIYear2 = tdataPOI.filter(
+    aq.escape((d) => (d.year == selected_year) | (d.year == 1910))
+  );
+  const tdataPOIYear2NearDays = tdataPOIYear2
+    .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+    .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7));
+
+  const tdataPOInearDays = tdataPOI
+    .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
+    .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7));
+
+  const tdataPOInearDaysEx = tdataPOInearDays.filter(
+    aq.escape((d) => d.temp_percentile >= POI.selected_threshold)
+  );
+
+  const tickFormater1 = (x) =>
+    x - selected_dayOfYear == 0
+      ? $("#dateInput").val()
+      : `${x - selected_dayOfYear} Days`;
+
   switch (index) {
     case 0:
-      break;
     case 1:
-      break;
     case 2:
-      LineChart(
-        tdataPOI.filter(
-          aq.escape((d) => d.year == selected_date.getFullYear())
-        ),
-        fig1
-      );
+      LineChart(tdataPOIYear, fig1, {});
       break;
     case 3:
-      LineChart(
-        tdataPOI.filter(
-          aq.escape(
-            (d) => (d.year == selected_date.getFullYear()) | (d.year == 1910)
-          )
-        ),
-        fig1
-      );
+      LineChart(tdataPOIYear2, fig1, {});
       break;
     case 4:
-      LineChart(
-        tdataPOI
-          .filter(
-            aq.escape(
-              (d) => (d.year == selected_date.getFullYear()) | (d.year == 1910)
-            )
-          )
-          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
-        fig1
-      );
+      LineChart(tdataPOIYear2NearDays, fig1, {
+        tickFormater: tickFormater1,
+      });
       break;
     case 5:
-      LineChart(
-        tdataPOI
-          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
-        fig1
-      );
+      LineChart(tdataPOInearDays, fig1, {
+        tickFormater: tickFormater1,
+      });
       break;
     case 6:
-      LineChart_Dot(
-        tdataPOI
-          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
-        fig1
-      );
+      LineChart(tdataPOInearDays, fig1, {
+        tickFormater: tickFormater1,
+      });
+      DotPlot(tdataPOInearDays, fig1, {
+        tickFormater: tickFormater1,
+      });
       break;
     case 7:
-      LineChart_Dot(
-        tdataPOI
-          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.temp_percentile >= 50)),
-        fig1
-      );
-      DotPlot(
-        tdataPOI
-          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.temp_percentile >= 50)),
-        fig1
-      );
+      DotPlot(tdataPOInearDaysEx, fig1, {
+        tickFormater: tickFormater1,
+      });
       break;
     case 8:
-      DotPlot_dodge(
-        tdataPOI
-          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.temp_percentile >= 50)),
-        fig1
-      );
+      DotPlot_dodge(tdataPOInearDaysEx, fig1);
       break;
     case 9:
-      DotPlot_dodge2(
-        tdataPOI
-          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7))
-          .filter(aq.escape((d) => d.temp_percentile >= 50)),
-        fig1
-      );
+      DotPlot_dodge2(tdataPOInearDaysEx, fig1);
       break;
     case 10:
-      DotPlot_dodge2(
-        tdataPOI
-          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
-        fig1
-      );
+      DotPlot_dodge2(tdataPOInearDays, fig1);
       break;
     case 11:
-      Histgram(
-        tdataPOI
-          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
-        fig1
-      );
+      Histgram(tdataPOInearDays, fig1);
       break;
     case 12:
-      Histgram2(
-        tdataPOI
-          .filter(aq.escape((d) => d.day_of_year >= selected_dayOfYear - 7))
-          .filter(aq.escape((d) => d.day_of_year <= selected_dayOfYear + 7)),
-        fig1
-      );
+      Histgram2(tdataPOInearDays, fig1);
       break;
     case 13:
-      Histgram2(tdataPOI, fig1);
+      Histgram2(tdataPOIYear, fig1);
       break;
     case 14:
-      Histgram2(tdataPOI.filter(aq.escape((d) => d.year == 1910)), fig1);
       break;
     case 15:
-      Histgram2(
-        tdataPOI.filter(
-          aq.escape((d) => d.year == selected_date.getFullYear())
-        ),
-        fig1
-      );
       break;
   }
 }
@@ -225,7 +200,8 @@ function handleResize() {
 }
 
 // scrollama event handlers
-function handleStepEnter({ element, direction, index }) {
+function handleStepEnter(response, POI) {
+  const { element, direction, index } = response;
   // add color to current step only
   steps.classed("active", false);
   d3.select(element).classed("active", true);
@@ -239,7 +215,7 @@ function handleStepEnter({ element, direction, index }) {
   d3.select("#dynamic_nav_container").selectAll("a").classed("active", false);
   d3.select(`#scrollama_step_tag_${index}`).classed("active", true);
 
-  stepTrigger(index);
+  stepRenderTrigger(index, POI);
 }
 
 function setStepNavigationBar() {
@@ -293,25 +269,26 @@ function init() {
   });
 
   // 3. bind scrollama event handlers (this can be chained like below)
-  scroller.onStepEnter(handleStepEnter);
+  const POI = {
+    selected_station: "Melbourne",
+    selected_date_string: "2022-01-14",
+    selected_type: "tmax",
+    selected_threshold: "95",
+  };
+  scroller.onStepEnter((response) => handleStepEnter(response, POI));
 
   setStepNavigationBar();
 
-  // 4. render the first map
   BubbleMap(sdata, fig_map);
-  localStorage.setItem("selected_date_string", selected_date_string);
+
+  // localStorage.setItem("selected_date_string", selected_date_string);
 }
 
-window.onscroll = function () {
-  myFunction();
-  console.log(sticky);
-};
+const interestbar = document.getElementById("interestbar");
+const stickyOffset = interestbar.offsetTop;
 
-var interestbar = document.getElementById("interestbar");
-var sticky = interestbar.offsetTop;
-
-function myFunction() {
-  if (window.pageYOffset >= sticky) {
+function stickyBar() {
+  if (window.pageYOffset >= stickyOffset) {
     interestbar.classList.add("sticky-top");
   } else {
     interestbar.classList.remove("sticky-top");
@@ -319,6 +296,6 @@ function myFunction() {
 }
 
 // kick things off
-window.onload = init();
+window.onload = () => init();
+window.onscroll = () => stickyBar();
 window.addEventListener("resize", handleResize);
-toggleSwitch.addEventListener("change", switchTheme, false);
